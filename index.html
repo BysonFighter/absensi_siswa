@@ -899,7 +899,8 @@ function reportMonthLabel(month, year) {
   const monthName = REPORT_MONTHS.find(item => Number(item.value) === Number(month))?.label || "";
   return `${monthName} ${year}`;
 }
-
+const ACADEMIC_YEAR = "2026/2027";
+const SEMESTER_LABEL = "Ganjil";
 function schoolYearLabel() {
   return ACADEMIC_YEAR;
 }
