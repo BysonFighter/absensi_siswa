@@ -986,11 +986,12 @@ function buildReportTable(report) {
           <th rowspan="3" class="title-cell count-head">Alpha</th>
         </tr>
         <tr>
-          <th class="title-cell">URUT</th>
-          <th class="title-cell">NISN</th>
+          
           <th colspan="${days.length}" class="title-cell">Tanggal</th>
         </tr>
         <tr>
+        <th class="title-cell">URUT</th>
+          <th class="title-cell">NISN</th>
           <th colspan="4" class="title-cell" style="border:none;background:transparent;padding:0;height:0"></th>
           ${headerDays}
         </tr>
@@ -1238,8 +1239,8 @@ function createReportWorkbook(report) {
   const header2 = [`TAHUN PELAJARAN ${schoolYearLabel()}`];
   const header3 = [`Jenis Rombel: Kelas Utama - Nama Rombel: ${classRoom} - ${semesterLabel()} - Wali Kelas: ${teacherName}`];
   const row5 = ["NOMOR", "", "NAMA SISWA", "L/P", ...days.map(() => ""), "Hadir", "Sakit", "Ijin", "Alpha"];
-  const row6 = ["URUT", "NISN", "", "", "Tanggal", ...days.map(() => ""), "", "", "", ""];
-  const row7 = ["", "", "", "", ...days.map((d) => String(d.day)), "", "", "", ""];
+  const row6 = ["", "", "", "", "Tanggal", ...days.map(() => ""), "", "", "", ""];
+  const row7 = ["URUT", "NISN", "", "", ...days.map((d) => String(d.day)), "", "", "", ""];
   const data = [header1, header2, header3, [], row5, row6, row7];
 
   students.forEach((student, index) => {
