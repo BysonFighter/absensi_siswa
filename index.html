@@ -902,11 +902,11 @@ function reportMonthLabel(month, year) {
 }
 
 function schoolYearLabel() {
-  return "2026/2027";
+  return ACADEMIC_YEAR;
 }
 
 function semesterLabel() {
-  return "GANJIL";
+  return SEMESTER_LABEL;
 }
 
 function statusLabel(status) {
@@ -940,9 +940,9 @@ function buildReportTable(report) {
   const days = report.days || [];
   const students = report.students || [];
   const colWeights = [
-    4.2, 8.8, 17.2, 5.4,
-    ...days.map(() => 0.82),
-    4.2, 4.2, 4.2, 4.2,
+    3.6, 9.4, 18.0, 5.0,
+    ...days.map(() => 0.96),
+    4.0, 4.0, 4.0, 4.0,
   ];
   const totalWeight = colWeights.reduce((sum, value) => sum + value, 0);
   const colgroup = colWeights
@@ -995,6 +995,7 @@ function buildReportTable(report) {
         </tr>
       </thead>
       <tbody>
+        <tr class="body-gap"><td colspan="${4 + days.length + 4}"></td></tr>
         ${rows}
       </tbody>
     </table>
@@ -1072,16 +1073,21 @@ function buildReportHtml(report) {
   }
   .report-table .num-cell {
     white-space: nowrap;
-    width: 3ch;
+    width: 2.8ch;
   }
   .report-table .student-nisn {
     white-space: nowrap;
-    width: 8ch;
+    width: 9.5ch;
   }
   .report-table .student-name {
     white-space: nowrap;
-    width: 16ch;
+    width: 18ch;
     font-size: 6.9px;
+  }
+  .report-table .body-gap td {
+    border: none;
+    height: 3px;
+    padding: 0;
   }
   .report-table .title-cell {
     font-weight: 700;
@@ -1232,7 +1238,7 @@ function createReportWorkbook(report) {
   const row5 = ["NOMOR", "", "NAMA SISWA", "L/P", ...days.map(() => ""), "Hadir", "Sakit", "Ijin", "Alpha"];
   const row6 = ["URUT", "NISN", "", "", "Tanggal", ...days.map(() => ""), "", "", "", ""];
   const row7 = ["", "", "", "", ...days.map((d) => String(d.day)), "", "", "", ""];
-  const data = [header1, header2, header3, [], row5, row6, row7];
+  const data = [header1, header2, header3, [], row5, row6, row7, []];
 
   students.forEach((student, index) => {
     const totals = student.totals || { H: 0, S: 0, I: 0, A: 0 };
@@ -1260,8 +1266,8 @@ function createReportWorkbook(report) {
   const ws = XLSX.utils.aoa_to_sheet(data);
 
   const colWidths = [
-    6, 10, 22, 6,
-    ...days.map(() => 3.4),
+    4.5, 10.5, 20, 6,
+    ...days.map(() => 4.0),
     5, 5, 5, 5,
   ];
   ws["!cols"] = colWidths.map((width) => ({ wch: width }));
@@ -1362,7 +1368,7 @@ function createReportWorkbook(report) {
 
   // Body
   students.forEach((student, idx) => {
-    const rowNumber = 7 + idx;
+    const rowNumber = 8 + idx;
     const values = [
       idx + 1,
       student.nisn || "",
@@ -1388,7 +1394,7 @@ function createReportWorkbook(report) {
   });
 
   // Border grid for the full table area so the lines are complete.
-  for (let r = 4; r < 7 + students.length; r += 1) {
+  for (let r = 4; r < 8 + students.length; r += 1) {
     for (let c = 0; c <= lastCol; c += 1) {
       const addr = XLSX.utils.encode_cell({ r, c });
       if (!ws[addr]) {
@@ -1403,6 +1409,19 @@ function createReportWorkbook(report) {
 
   // Footer
   setCell(XLSX.utils.encode_cell({ r: footerDateRow, c: 0 }), `Bandung, ${monthLabel}`, styleFooter);
+
+  const signatureStartCol = Math.max(0, lastCol - 4);
+  const signatureStyle = {
+    alignment: { horizontal: "center", vertical: "center" },
+    border: {
+      bottom: { style: "thin", color: { rgb: "000000" } },
+    },
+  };
+  for (let i = 1; i <= 4; i += 1) {
+    const r = footerDateRow + i;
+    ws["!merges"].push({ s: { r, c: signatureStartCol }, e: { r, c: lastCol } });
+    setCell(XLSX.utils.encode_cell({ r, c: signatureStartCol }), "", signatureStyle);
+  }
   setCell(XLSX.utils.encode_cell({ r: footerNameRow, c: 0 }), HEADMASTER_NAME, styleFooterName);
 
   // Row heights
@@ -1414,6 +1433,7 @@ function createReportWorkbook(report) {
     { hpt: 20 },
     { hpt: 20 },
     { hpt: 20 },
+    { hpt: 6 },
   ];
   for (let i = 0; i < students.length; i += 1) {
     ws["!rows"].push({ hpt: 18 });
