@@ -39,7 +39,7 @@ const MONTH_NAMES = [
 const WEEKDAY_SHORT = ["Min", "Sen", "Sel", "Rab", "Kam", "Jum", "Sab"];
 
 const ACADEMIC_YEAR = "2025/2026";
-const SEMESTER_LABEL = "Semester Ganjil";
+const SEMESTER_LABEL = "Ganjil";
 
 function monthName(month) {
   return MONTH_NAMES[(month || 1) - 1] || "";

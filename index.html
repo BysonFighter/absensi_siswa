@@ -541,6 +541,7 @@ const REPORT_MONTHS = [
   { value: 12, label: "Desember" },
 ];
 
+const SEMESTER_LABEL = "Ganjil";
 const HEADMASTER_NAME = "Isah Aisyah, A.Ma.Pd";
 
 const el = (s) => document.querySelector(s);
@@ -892,15 +893,14 @@ function getReportRoomName(classCode) {
 }
 
 function getReportTeacherName(report) {
-  return ".";
+  return report?.class?.waliKelas?.trim() || ".";
 }
 
 function reportMonthLabel(month, year) {
   const monthName = REPORT_MONTHS.find(item => Number(item.value) === Number(month))?.label || "";
   return `${monthName} ${year}`;
 }
-const ACADEMIC_YEAR = "2026/2027";
-const SEMESTER_LABEL = "Ganjil";
+
 function schoolYearLabel() {
   return ACADEMIC_YEAR;
 }
@@ -934,9 +934,20 @@ function countStatuses(attendanceMap, days) {
   return counts;
 }
 
+
 function buildReportTable(report) {
   const days = report.days || [];
   const students = report.students || [];
+  const colWeights = [
+    6, 12, 24, 6,
+    ...days.map(() => 1),
+    5, 5, 5, 5,
+  ];
+  const totalWeight = colWeights.reduce((sum, value) => sum + value, 0);
+  const colgroup = colWeights
+    .map((weight) => `<col style="width:${((weight / totalWeight) * 100).toFixed(4)}%;">`)
+    .join("");
+
   const rows = students.map((student, index) => {
     const totals = student.totals || { H: 0, S: 0, I: 0, A: 0 };
     const cells = days.map((day) => {
@@ -945,9 +956,9 @@ function buildReportTable(report) {
     }).join("");
     return `
       <tr>
-        <td class="left">${index + 1}</td>
-        <td class="left">${escapeHtml(student.nisn || "")}</td>
-        <td class="left">${escapeHtml(student.name || "")}</td>
+        <td class="left num-cell">${index + 1}</td>
+        <td class="left student-nisn">${escapeHtml(student.nisn || "")}</td>
+        <td class="left student-name">${escapeHtml(student.name || "")}</td>
         <td>${escapeHtml(student.gender || "L")}</td>
         ${cells}
         <td class="count">${totals.H || 0}</td>
@@ -958,12 +969,15 @@ function buildReportTable(report) {
     `;
   }).join("");
 
-  const headerDays = days.map((day) => `<th>${day.day}</th>`).join("");
+  const headerDays = days.map((day) => `<th class="date-head">${day.day}</th>`).join("");
   return `
     <table class="report-table">
+      <colgroup>${colgroup}</colgroup>
       <thead>
         <tr>
-          <th colspan="4" class="title-cell">NOMOR</th>
+          <th colspan="2" class="title-cell">NOMOR</th>
+          <th rowspan="2" class="title-cell name-head">NAMA SISWA</th>
+          <th rowspan="2" class="title-cell lp-head">L/P</th>
           <th colspan="${days.length}" class="title-cell month-cell">${escapeHtml(report.monthLabel || "")}</th>
           <th rowspan="3" class="title-cell count-head">Hadir</th>
           <th rowspan="3" class="title-cell count-head">Sakit</th>
@@ -971,10 +985,8 @@ function buildReportTable(report) {
           <th rowspan="3" class="title-cell count-head">Alpha</th>
         </tr>
         <tr>
-          <th rowspan="2" class="title-cell">URUT</th>
-          <th rowspan="2" class="title-cell">NISN</th>
-          <th rowspan="2" class="title-cell">NAMA SISWA</th>
-          <th rowspan="2" class="title-cell">L/P</th>
+          <th class="title-cell">URUT</th>
+          <th class="title-cell">NISN</th>
           <th colspan="${days.length}" class="title-cell">Tanggal</th>
         </tr>
         <tr>
@@ -988,12 +1000,15 @@ function buildReportTable(report) {
   `;
 }
 
+
+
 function buildReportHtml(report) {
   const className = report?.class?.name || "";
   const classRoom = getReportRoomName(report?.class?.code || "");
   const titleMonth = escapeHtml(report.monthLabel || "");
   const schoolYear = escapeHtml(schoolYearLabel());
   const semester = escapeHtml(semesterLabel());
+  const teacherName = escapeHtml(getReportTeacherName(report));
   const titleClass = escapeHtml(className || "");
   const studentsCount = report.students?.length || 0;
   const reportTable = buildReportTable(report);
@@ -1031,6 +1046,7 @@ function buildReportHtml(report) {
   .header .h3 {
     font-size: 11px;
     margin-top: 4px;
+    line-height: 1.35;
   }
   .meta {
     font-size: 11px;
@@ -1043,28 +1059,44 @@ function buildReportHtml(report) {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 8px;
+    font-size: 7.5px;
   }
   .report-table th, .report-table td {
     border: 1px solid #000;
-    padding: 2px 3px;
+    padding: 1.5px 2px;
     text-align: center;
     vertical-align: middle;
-    word-break: break-word;
+    word-break: normal;
   }
   .report-table .left {
     text-align: left;
   }
+  .report-table .num-cell,
+  .report-table .student-nisn,
+  .report-table .student-name {
+    white-space: nowrap;
+  }
+  .report-table .student-name {
+    font-size: 7.2px;
+  }
+  .report-table .student-nisn {
+    font-size: 7.3px;
+  }
   .report-table .title-cell {
     font-weight: 700;
     background: #f2f2f2;
+    font-size: 7.8px;
   }
   .report-table .month-cell {
-    font-size: 9px;
+    font-size: 8px;
+  }
+  .report-table .date-head {
+    font-size: 7px;
+    padding: 1px 0;
   }
   .day-cell {
     font-weight: 700;
-    font-size: 9px;
+    font-size: 8px;
   }
   .status-h { color: #000; }
   .status-s { color: #d97706; }
@@ -1073,17 +1105,22 @@ function buildReportHtml(report) {
   .count {
     font-weight: 700;
   }
-  .footer {
-    margin-top: 12px;
-    display:flex;
-    justify-content:flex-end;
+  .report-footer {
+    margin-top: 14px;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .report-footer .block {
+    width: 260px;
+    text-align: left;
     font-size: 11px;
   }
-  .footer-box {
-    width: 240px;
-    text-align: left;
+  .report-footer .date {
+    white-space: nowrap;
   }
-  .footer-space { height: 56px; }
+  .report-footer .spacer {
+    height: 74px;
+  }
 </style>
 </head>
 <body>
@@ -1091,7 +1128,7 @@ function buildReportHtml(report) {
     <div class="header">
       <div class="h1">DAFTAR HADIR SISWA SD YPU</div>
       <div class="h2">TAHUN PELAJARAN ${schoolYear}</div>
-      <div class="h3">Jenis Rombel: Kelas Utama - Nama Rombel: ${escapeHtml(classRoom)} - ${escapeHtml(semester)} - Wali Kelas: .</div>
+      <div class="h3">Jenis Rombel: Kelas Utama - Nama Rombel: ${escapeHtml(classRoom)} - ${escapeHtml(semester)} - Wali Kelas: ${teacherName}</div>
     </div>
 
     <div class="meta">
@@ -1101,12 +1138,11 @@ function buildReportHtml(report) {
 
     ${reportTable}
 
-    <div class="footer-space"></div>
-    <div class="footer">
-      <div class="footer-box">
-        <div>Bandung, ${titleMonth}</div>
-        <div style="height: 56px;"></div>
-        <strong>${HEADMASTER_NAME}</strong>
+    <div class="report-footer">
+      <div class="block">
+        <div class="date">Bandung, ${titleMonth}</div>
+        <div class="spacer"></div>
+        <div><strong>${HEADMASTER_NAME}</strong></div>
       </div>
     </div>
   </div>
@@ -1114,47 +1150,47 @@ function buildReportHtml(report) {
 </html>`;
 }
 
+
+
 async function printMonthlyReport() {
   try {
     const report = await loadMonthlyReportData();
     const html = buildReportHtml(report);
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) {
+      throw new Error("Popup diblokir browser. Izinkan popup untuk mencetak laporan.");
+    }
 
-    const iframe = document.createElement("iframe");
-    iframe.style.position = "fixed";
-    iframe.style.right = "0";
-    iframe.style.bottom = "0";
-    iframe.style.width = "0";
-    iframe.style.height = "0";
-    iframe.style.border = "0";
-    iframe.style.visibility = "hidden";
-    iframe.srcdoc = html;
+    printWindow.document.open();
+    printWindow.document.write(html);
+    printWindow.document.close();
 
-    iframe.onload = () => {
+    const triggerPrint = () => {
       try {
-        const win = iframe.contentWindow;
-        if (!win) throw new Error("Gagal membuka pratinjau cetak.");
-        win.focus();
-        setTimeout(() => {
-          try { win.print(); } catch (err) { console.error(err); }
-        }, 250);
-        setTimeout(() => {
-          try { document.body.removeChild(iframe); } catch (err) {}
-        }, 4000);
-      } catch (error) {
-        showError(error);
+        printWindow.focus();
+        printWindow.print();
+      } catch (err) {
+        console.error(err);
       }
     };
 
-    document.body.appendChild(iframe);
+    if (printWindow.document.readyState === "complete") {
+      setTimeout(triggerPrint, 600);
+    } else {
+      printWindow.addEventListener("load", () => setTimeout(triggerPrint, 600), { once: true });
+      setTimeout(triggerPrint, 1200);
+    }
   } catch (error) {
     showError(error);
   }
 }
 
+
 function styleCell(cell, style) {
   cell.s = style;
   return cell;
 }
+
 
 function createReportWorkbook(report) {
   if (!window.XLSX) {
@@ -1167,13 +1203,14 @@ function createReportWorkbook(report) {
   const students = report.students || [];
   const monthLabel = report.monthLabel || "";
   const classRoom = getReportRoomName(report?.class?.code || "");
+  const teacherName = getReportTeacherName(report);
 
   const header1 = ["DAFTAR HADIR SISWA SD YPU"];
   const header2 = [`TAHUN PELAJARAN ${schoolYearLabel()}`];
-  const header3 = [`Jenis Rombel: Kelas Utama - Nama Rombel: ${classRoom} - ${semesterLabel()} - Wali Kelas: .`];
+  const header3 = [`Jenis Rombel: Kelas Utama - Nama Rombel: ${classRoom} - ${semesterLabel()} - Wali Kelas: ${teacherName}`];
   const row5 = ["NOMOR", "", "NAMA SISWA", "L/P", ...days.map(() => ""), "Hadir", "Sakit", "Ijin", "Alpha"];
-  const row6 = ["", "", "", "", ...days.map(() => ""), "", "", "", ""];
-  const row7 = ["URUT", "NISN", "NAMA SISWA", "L/P", ...days.map((d) => String(d.day)), "", "", "", ""];
+  const row6 = ["URUT", "NISN", "", "", "Tanggal", ...days.map(() => ""), "", "", "", ""];
+  const row7 = ["", "", "", "", ...days.map((d) => String(d.day)), "", "", "", ""];
   const data = [header1, header2, header3, [], row5, row6, row7];
 
   students.forEach((student, index) => {
@@ -1192,23 +1229,22 @@ function createReportWorkbook(report) {
     data.push(row);
   });
 
-  data.push([]);
-  data.push([]);
-  data.push([]);
-  data.push([]);
-  data.push([]);
-  data.push([]);
-  data.push([]);
+  const blankRowCount = 7;
+  for (let i = 0; i < blankRowCount; i += 1) {
+    data.push([]);
+  }
+
   const ws = XLSX.utils.aoa_to_sheet(data);
 
-  const maxCol = 4 + days.length + 4 - 1;
-  const colWidths = [
-    { wch: 6 }, { wch: 13 }, { wch: 31 }, { wch: 5 },
-    ...days.map(() => ({ wch: 4 })),
-    { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 },
+  const colWeights = [
+    6, 12, 24, 6,
+    ...days.map(() => 1),
+    5, 5, 5, 5,
   ];
-  ws["!cols"] = colWidths;
+  const totalWeight = colWeights.reduce((sum, value) => sum + value, 0);
+  ws["!cols"] = colWeights.map((weight) => ({ wch: Math.max(3, Math.round((weight / totalWeight) * 120)) }));
 
+  const maxCol = 4 + days.length + 4 - 1;
   const studentStartRow = 7;
   const footerDateRow = studentStartRow + students.length + 2;
   const footerNameRow = footerDateRow + 5;
@@ -1217,9 +1253,9 @@ function createReportWorkbook(report) {
     { s: { r: 0, c: 0 }, e: { r: 0, c: maxCol } },
     { s: { r: 1, c: 0 }, e: { r: 1, c: maxCol } },
     { s: { r: 2, c: 0 }, e: { r: 2, c: maxCol } },
-    { s: { r: 4, c: 0 }, e: { r: 6, c: 1 } },
-    { s: { r: 4, c: 2 }, e: { r: 6, c: 2 } },
-    { s: { r: 4, c: 3 }, e: { r: 6, c: 3 } },
+    { s: { r: 4, c: 0 }, e: { r: 4, c: 1 } },
+    { s: { r: 4, c: 2 }, e: { r: 5, c: 2 } },
+    { s: { r: 4, c: 3 }, e: { r: 5, c: 3 } },
     { s: { r: 4, c: 4 }, e: { r: 4, c: 3 + days.length } },
     { s: { r: 5, c: 4 }, e: { r: 5, c: 3 + days.length } },
     { s: { r: 4, c: 4 + days.length }, e: { r: 6, c: 4 + days.length } },
@@ -1247,7 +1283,7 @@ function createReportWorkbook(report) {
     },
   };
   const styleBody = {
-    alignment: { horizontal: "center", vertical: "center", wrapText: true },
+    alignment: { horizontal: "center", vertical: "center", wrapText: false },
     border: {
       top: { style: "thin", color: { rgb: "000000" } },
       bottom: { style: "thin", color: { rgb: "000000" } },
@@ -1257,10 +1293,10 @@ function createReportWorkbook(report) {
   };
   const styleLeft = {
     ...styleBody,
-    alignment: { horizontal: "left", vertical: "center", wrapText: true },
+    alignment: { horizontal: "left", vertical: "center", wrapText: false, shrinkToFit: true },
   };
   const styleFooter = {
-    alignment: { horizontal: "left", vertical: "center", wrapText: false },
+    alignment: { horizontal: "right", vertical: "center", wrapText: false },
   };
 
   const statusStyle = {
@@ -1280,26 +1316,23 @@ function createReportWorkbook(report) {
   setCell("A3", header3[0], styleTitle);
 
   // Header rows
-  for (let c = 0; c < row5.length; c += 1) {
-    const col = XLSX.utils.encode_cell({ r: 4, c });
-    if (c <= 3 || c >= 4 + days.length) {
-      setCell(col, row5[c], styleHeader);
-    }
-  }
-
-  // merged heading for month and dates
-  setCell(XLSX.utils.encode_cell({ r: 4, c: 4 }), monthLabel, styleHeader);
-  setCell(XLSX.utils.encode_cell({ r: 5, c: 4 }), "Tanggal", styleHeader);
-  for (let i = 0; i < days.length; i += 1) {
-    const addr = XLSX.utils.encode_cell({ r: 6, c: 4 + i });
-    setCell(addr, String(days[i].day), styleHeader);
-  }
-
-  // Right summary headers
+  setCell("A5", row5[0], styleHeader);
+  setCell("C5", row5[2], styleHeader);
+  setCell("D5", row5[3], styleHeader);
+  setCell("E5", monthLabel, styleHeader);
   setCell(XLSX.utils.encode_cell({ r: 4, c: 4 + days.length }), "Hadir", styleHeader);
   setCell(XLSX.utils.encode_cell({ r: 4, c: 5 + days.length }), "Sakit", styleHeader);
   setCell(XLSX.utils.encode_cell({ r: 4, c: 6 + days.length }), "Ijin", styleHeader);
   setCell(XLSX.utils.encode_cell({ r: 4, c: 7 + days.length }), "Alpha", styleHeader);
+
+  setCell("A6", row6[0], styleHeader);
+  setCell("B6", row6[1], styleHeader);
+  setCell("E6", row6[4], styleHeader);
+
+  for (let i = 0; i < days.length; i += 1) {
+    const addr = XLSX.utils.encode_cell({ r: 6, c: 4 + i });
+    setCell(addr, String(days[i].day), styleHeader);
+  }
 
   // Body
   students.forEach((student, idx) => {
@@ -1318,7 +1351,7 @@ function createReportWorkbook(report) {
     values.forEach((value, c) => {
       const addr = XLSX.utils.encode_cell({ r: rowNumber, c });
       const rawStatus = c >= 4 && c < 4 + days.length ? String(value || "").toUpperCase() : "";
-      const style = c === 2 ? styleLeft : styleBody;
+      const style = (c === 1 || c === 2) ? styleLeft : styleBody;
       if (c >= 4 && c < 4 + days.length) {
         const statusStyleApplied = statusStyle[rawStatus] || styleBody;
         setCell(addr, statusLabel(rawStatus), statusStyleApplied);
@@ -1332,24 +1365,32 @@ function createReportWorkbook(report) {
   setCell(XLSX.utils.encode_cell({ r: footerDateRow, c: 0 }), `Bandung, ${monthLabel}`, styleFooter);
   setCell(XLSX.utils.encode_cell({ r: footerNameRow, c: 0 }), HEADMASTER_NAME, styleFooter);
 
-  // Row heights for blank signature space
+  // Row heights
   ws["!rows"] = [
     { hpt: 18 },
     { hpt: 18 },
     { hpt: 18 },
     { hpt: 8 },
-    { hpt: 18 },
-    { hpt: 18 },
-    { hpt: 18 },
+    { hpt: 20 },
+    { hpt: 20 },
+    { hpt: 20 },
   ];
   for (let i = 0; i < students.length; i += 1) {
     ws["!rows"].push({ hpt: 18 });
   }
-  ws["!rows"].push({ hpt: 18 }, { hpt: 18 }, { hpt: 18 }, { hpt: 18 }, { hpt: 18 }, { hpt: 18 }, { hpt: 18 });
+  for (let i = 0; i < blankRowCount; i += 1) {
+    ws["!rows"].push({ hpt: 18 });
+  }
+  ws["!rows"][footerDateRow] = { hpt: 18 };
+  for (let i = footerDateRow + 1; i < footerNameRow; i += 1) {
+    ws["!rows"][i] = { hpt: 18 };
+  }
+  ws["!rows"][footerNameRow] = { hpt: 18 };
 
   XLSX.utils.book_append_sheet(wb, ws, "Laporan");
   return wb;
 }
+
 
 async function exportMonthlyReportExcel() {
   try {
