@@ -902,11 +902,11 @@ function reportMonthLabel(month, year) {
 }
 
 function schoolYearLabel() {
-  return "2026/2027";
+  return ACADEMIC_YEAR;
 }
 
 function semesterLabel() {
-  return "GANJIL";
+  return SEMESTER_LABEL;
 }
 
 function statusLabel(status) {
@@ -996,7 +996,6 @@ function buildReportTable(report) {
         </tr>
       </thead>
       <tbody>
-        <tr class="body-gap"><td colspan="${4 + days.length + 4}"></td></tr>
         ${rows}
       </tbody>
     </table>
@@ -1241,7 +1240,7 @@ function createReportWorkbook(report) {
   const row5 = ["NOMOR", "", "NAMA SISWA", "L/P", ...days.map(() => ""), "Hadir", "Sakit", "Ijin", "Alpha"];
   const row6 = ["URUT", "NISN", "", "", "Tanggal", ...days.map(() => ""), "", "", "", ""];
   const row7 = ["", "", "", "", ...days.map((d) => String(d.day)), "", "", "", ""];
-  const data = [header1, header2, header3, [], row5, row6, row7, []];
+  const data = [header1, header2, header3, [], row5, row6, row7];
 
   students.forEach((student, index) => {
     const totals = student.totals || { H: 0, S: 0, I: 0, A: 0 };
