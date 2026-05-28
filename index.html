@@ -902,11 +902,11 @@ function reportMonthLabel(month, year) {
 }
 
 function schoolYearLabel() {
-  return "2026/2027";
+  return ACADEMIC_YEAR;
 }
 
 function semesterLabel() {
-  return "GANJIL";
+  return SEMESTER_LABEL;
 }
 
 function statusLabel(status) {
@@ -991,6 +991,7 @@ function buildReportTable(report) {
           <th colspan="${days.length}" class="title-cell">Tanggal</th>
         </tr>
         <tr>
+          <th colspan="4" class="title-cell" style="border:none;background:transparent;padding:0;height:0"></th>
           ${headerDays}
         </tr>
       </thead>
@@ -1120,17 +1121,19 @@ function buildReportHtml(report) {
     margin-top: 14px;
     display: flex;
     justify-content: flex-end;
+    padding-right: 18px;
   }
   .report-footer .block {
-    width: 260px;
-    text-align: right;
+    width: 290px;
+    text-align: left;
     font-size: 11px;
   }
   .report-footer .date {
     white-space: nowrap;
+    margin-bottom: 68px;
   }
   .report-footer .spacer {
-    height: 74px;
+    height: 0;
   }
 </style>
 </head>
