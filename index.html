@@ -1437,9 +1437,9 @@ function createReportWorkbook(report) {
     { hpt: 20 },
     { hpt: 20 },
     { hpt: 20 },
-    { hpt: 20 },
+    { hpt: 18 },
   ];
-  for (let i = 0; i < students.length; i += 1) {
+  for (let i = 1; i < students.length; i += 1) {
     ws["!rows"].push({ hpt: 18 });
   }
   const totalRowsNeeded = footerNameRow + 1;
