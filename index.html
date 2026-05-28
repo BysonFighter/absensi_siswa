@@ -119,6 +119,7 @@
     cursor:pointer;
   }
   .day.active { background:#eff6ff; border-color:#93c5fd; color:#1d4ed8; }
+  .day:disabled { opacity:.38; cursor:not-allowed; background:#f8fafc; color:#cbd5e1; }
   .day .n { font-size:18px; font-weight:800; margin-top:4px; }
   .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
   .stat { border-radius:16px; padding:12px 10px; text-align:center; border:1px solid var(--line); }
@@ -540,6 +541,8 @@ const REPORT_MONTHS = [
   { value: 12, label: "Desember" },
 ];
 
+const HEADMASTER_NAME = "Isah Aisyah, A.Ma.Pd";
+
 const el = (s) => document.querySelector(s);
 const state = {
   classes: [],
@@ -752,16 +755,19 @@ function renderTop() {
   const dateObj = parseLocalDate(state.date);
   el("#dateText").innerHTML = `<span>📅</span><span>${prettyDate(dateObj)}</span>`;
   const wk = startWeek(dateObj);
+  const today = todayIso();
   el("#week").innerHTML = Array.from({ length: 7 }, (_, i) => {
     const d = new Date(wk);
     d.setDate(d.getDate() + i);
     const iso = todayIso(d);
     const active = iso === state.date ? "active" : "";
-    return `<button class="day ${active}" data-date="${iso}"><div>${prettyShort(d).split(",")[0]}</div><div class="n">${d.getDate()}</div></button>`;
+    const disabled = iso > today ? "disabled" : "";
+    return `<button class="day ${active}" data-date="${iso}" ${disabled}><div>${prettyShort(d).split(",")[0]}</div><div class="n">${d.getDate()}</div></button>`;
   }).join("");
 
   el("#week").querySelectorAll("[data-date]").forEach(btn => {
     btn.addEventListener("click", async () => {
+      if (btn.disabled) return;
       await changeDate(btn.dataset.date);
     });
   });
@@ -886,10 +892,7 @@ function getReportRoomName(classCode) {
 }
 
 function getReportTeacherName(report) {
-  const fromDb = String(report?.class?.waliKelas || "").trim();
-  if (fromDb) return fromDb;
-  if (report?.class?.code === "4B") return "Fahmi Arif";
-  return "Wali Kelas";
+  return ".";
 }
 
 function reportMonthLabel(month, year) {
@@ -898,18 +901,18 @@ function reportMonthLabel(month, year) {
 }
 
 function schoolYearLabel() {
-  return "2026-2027";
+  return ACADEMIC_YEAR;
 }
 
 function semesterLabel() {
-  return "Ganjil";
+  return SEMESTER_LABEL;
 }
 
 function statusLabel(status) {
   if (status === "H") return "✓";
-  if (status === "S") return "S";
-  if (status === "I") return "I";
-  if (status === "A") return "A";
+  if (status === "S") return "s";
+  if (status === "I") return "i";
+  if (status === "A") return "a";
   return "";
 }
 
@@ -985,7 +988,6 @@ function buildReportTable(report) {
 }
 
 function buildReportHtml(report) {
-  const teacher = getReportTeacherName(report);
   const className = report?.class?.name || "";
   const classRoom = getReportRoomName(report?.class?.code || "");
   const titleMonth = escapeHtml(report.monthLabel || "");
@@ -1071,16 +1073,16 @@ function buildReportHtml(report) {
     font-weight: 700;
   }
   .footer {
-    margin-top: 14px;
+    margin-top: 12px;
     display:flex;
     justify-content:flex-end;
     font-size: 11px;
   }
   .footer-box {
     width: 240px;
-    text-align: center;
+    text-align: left;
   }
-  .footer-space { height: 28px; }
+  .footer-space { height: 56px; }
 </style>
 </head>
 <body>
@@ -1088,7 +1090,7 @@ function buildReportHtml(report) {
     <div class="header">
       <div class="h1">DAFTAR HADIR SISWA SD YPU</div>
       <div class="h2">TAHUN PELAJARAN ${schoolYear}</div>
-      <div class="h3">Jenis Rombel: Kelas Utama - Nama Rombel: ${escapeHtml(classRoom)} - ${escapeHtml(semester)} - Wali Kelas: ${escapeHtml(teacher)}</div>
+      <div class="h3">Jenis Rombel: Kelas Utama - Nama Rombel: ${escapeHtml(classRoom)} - ${escapeHtml(semester)} - Wali Kelas: .</div>
     </div>
 
     <div class="meta">
@@ -1101,9 +1103,9 @@ function buildReportHtml(report) {
     <div class="footer-space"></div>
     <div class="footer">
       <div class="footer-box">
-        Bandung, ${titleMonth}
-        <div style="height: 36px;"></div>
-        <strong>${escapeHtml(teacher)}</strong>
+        <div>Bandung, ${titleMonth}</div>
+        <div style="height: 56px;"></div>
+        <strong>${HEADMASTER_NAME}</strong>
       </div>
     </div>
   </div>
@@ -1115,18 +1117,34 @@ async function printMonthlyReport() {
   try {
     const report = await loadMonthlyReportData();
     const html = buildReportHtml(report);
-    const win = window.open("", "_blank", "noopener,noreferrer,width=1200,height=900");
-    if (!win) {
-      setToast("Popup diblokir browser.");
-      return;
-    }
-    win.document.open();
-    win.document.write(html);
-    win.document.close();
-    win.focus();
-    setTimeout(() => {
-      try { win.print(); } catch (err) { console.error(err); }
-    }, 500);
+
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.style.visibility = "hidden";
+    iframe.srcdoc = html;
+
+    iframe.onload = () => {
+      try {
+        const win = iframe.contentWindow;
+        if (!win) throw new Error("Gagal membuka pratinjau cetak.");
+        win.focus();
+        setTimeout(() => {
+          try { win.print(); } catch (err) { console.error(err); }
+        }, 250);
+        setTimeout(() => {
+          try { document.body.removeChild(iframe); } catch (err) {}
+        }, 4000);
+      } catch (error) {
+        showError(error);
+      }
+    };
+
+    document.body.appendChild(iframe);
   } catch (error) {
     showError(error);
   }
@@ -1148,11 +1166,10 @@ function createReportWorkbook(report) {
   const students = report.students || [];
   const monthLabel = report.monthLabel || "";
   const classRoom = getReportRoomName(report?.class?.code || "");
-  const teacher = getReportTeacherName(report);
 
   const header1 = ["DAFTAR HADIR SISWA SD YPU"];
   const header2 = [`TAHUN PELAJARAN ${schoolYearLabel()}`];
-  const header3 = [`Jenis Rombel: Kelas Utama - Nama Rombel: ${classRoom} - ${semesterLabel()} - Wali Kelas: ${teacher}`];
+  const header3 = [`Jenis Rombel: Kelas Utama - Nama Rombel: ${classRoom} - ${semesterLabel()} - Wali Kelas: .`];
   const row5 = ["NOMOR", "", "NAMA SISWA", "L/P", ...days.map(() => ""), "Hadir", "Sakit", "Ijin", "Alpha"];
   const row6 = ["", "", "", "", ...days.map(() => ""), "", "", "", ""];
   const row7 = ["URUT", "NISN", "NAMA SISWA", "L/P", ...days.map((d) => String(d.day)), "", "", "", ""];
@@ -1174,10 +1191,13 @@ function createReportWorkbook(report) {
     data.push(row);
   });
 
-  const footerRow = data.length + 2;
   data.push([]);
   data.push([]);
-  data.push([, , , , ...days.map(() => ""), "", "", "", "",]);
+  data.push([]);
+  data.push([]);
+  data.push([]);
+  data.push([]);
+  data.push([]);
   const ws = XLSX.utils.aoa_to_sheet(data);
 
   const maxCol = 4 + days.length + 4 - 1;
@@ -1187,6 +1207,10 @@ function createReportWorkbook(report) {
     { wch: 6 }, { wch: 6 }, { wch: 6 }, { wch: 6 },
   ];
   ws["!cols"] = colWidths;
+
+  const studentStartRow = 7;
+  const footerDateRow = studentStartRow + students.length + 2;
+  const footerNameRow = footerDateRow + 5;
 
   const merges = [
     { s: { r: 0, c: 0 }, e: { r: 0, c: maxCol } },
@@ -1201,6 +1225,8 @@ function createReportWorkbook(report) {
     { s: { r: 4, c: 5 + days.length }, e: { r: 6, c: 5 + days.length } },
     { s: { r: 4, c: 6 + days.length }, e: { r: 6, c: 6 + days.length } },
     { s: { r: 4, c: 7 + days.length }, e: { r: 6, c: 7 + days.length } },
+    { s: { r: footerDateRow, c: 0 }, e: { r: footerDateRow, c: maxCol } },
+    { s: { r: footerNameRow, c: 0 }, e: { r: footerNameRow, c: maxCol } },
   ];
   ws["!merges"] = merges;
 
@@ -1231,6 +1257,9 @@ function createReportWorkbook(report) {
   const styleLeft = {
     ...styleBody,
     alignment: { horizontal: "left", vertical: "center", wrapText: true },
+  };
+  const styleFooter = {
+    alignment: { horizontal: "left", vertical: "center", wrapText: false },
   };
 
   const statusStyle = {
@@ -1273,7 +1302,7 @@ function createReportWorkbook(report) {
 
   // Body
   students.forEach((student, idx) => {
-    const rowNumber = 7 + idx;
+    const rowNumber = studentStartRow + idx;
     const values = [
       idx + 1,
       student.nisn || "",
@@ -1287,11 +1316,11 @@ function createReportWorkbook(report) {
     ];
     values.forEach((value, c) => {
       const addr = XLSX.utils.encode_cell({ r: rowNumber, c });
+      const rawStatus = c >= 4 && c < 4 + days.length ? String(value || "").toUpperCase() : "";
       const style = c === 2 ? styleLeft : styleBody;
       if (c >= 4 && c < 4 + days.length) {
-        const status = String(value || "").toUpperCase();
-        const cellStyle = statusStyle[status] || styleBody;
-        setCell(addr, value, cellStyle);
+        const statusStyleApplied = statusStyle[rawStatus] || styleBody;
+        setCell(addr, statusLabel(rawStatus), statusStyleApplied);
       } else {
         setCell(addr, value, style);
       }
@@ -1299,10 +1328,23 @@ function createReportWorkbook(report) {
   });
 
   // Footer
-  const footerDateRow = 8 + students.length + 1;
-  const footerNameRow = footerDateRow + 4;
-  setCell(XLSX.utils.encode_cell({ r: footerDateRow, c: 4 + days.length }), `Bandung, ${monthLabel}`, styleBody);
-  setCell(XLSX.utils.encode_cell({ r: footerNameRow, c: 4 + days.length }), teacher, styleBody);
+  setCell(XLSX.utils.encode_cell({ r: footerDateRow, c: 0 }), `Bandung, ${monthLabel}`, styleFooter);
+  setCell(XLSX.utils.encode_cell({ r: footerNameRow, c: 0 }), HEADMASTER_NAME, styleFooter);
+
+  // Row heights for blank signature space
+  ws["!rows"] = [
+    { hpt: 18 },
+    { hpt: 18 },
+    { hpt: 18 },
+    { hpt: 8 },
+    { hpt: 18 },
+    { hpt: 18 },
+    { hpt: 18 },
+  ];
+  for (let i = 0; i < students.length; i += 1) {
+    ws["!rows"].push({ hpt: 18 });
+  }
+  ws["!rows"].push({ hpt: 18 }, { hpt: 18 }, { hpt: 18 }, { hpt: 18 }, { hpt: 18 }, { hpt: 18 }, { hpt: 18 });
 
   XLSX.utils.book_append_sheet(wb, ws, "Laporan");
   return wb;
@@ -1348,6 +1390,7 @@ async function changeClass(nextClassCode) {
 
 async function changeDate(nextDate) {
   if (nextDate === state.date) return;
+  if (String(nextDate) > todayIso()) return;
   if (!(await confirmDiscardIfDirty())) return;
   state.date = nextDate;
   await loadClassData();
