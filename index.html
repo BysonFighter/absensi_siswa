@@ -902,11 +902,11 @@ function reportMonthLabel(month, year) {
 }
 
 function schoolYearLabel() {
-  return "2026/2027";
+  return ACADEMIC_YEAR;
 }
 
 function semesterLabel() {
-  return "Ganjil";
+  return SEMESTER_LABEL;
 }
 
 function statusLabel(status) {
@@ -935,13 +935,14 @@ function countStatuses(attendanceMap, days) {
 }
 
 
+
 function buildReportTable(report) {
   const days = report.days || [];
   const students = report.students || [];
   const colWeights = [
-    6, 12, 24, 6,
-    ...days.map(() => 1),
-    5, 5, 5, 5,
+    4.2, 8.8, 17.2, 5.4,
+    ...days.map(() => 0.82),
+    4.2, 4.2, 4.2, 4.2,
   ];
   const totalWeight = colWeights.reduce((sum, value) => sum + value, 0);
   const colgroup = colWeights
@@ -975,9 +976,9 @@ function buildReportTable(report) {
       <colgroup>${colgroup}</colgroup>
       <thead>
         <tr>
-          <th colspan="2" class="title-cell">NOMOR</th>
-          <th rowspan="2" class="title-cell name-head">NAMA SISWA</th>
-          <th rowspan="2" class="title-cell lp-head">L/P</th>
+          <th colspan="2" class="title-cell nomor-head">NOMOR</th>
+          <th rowspan="3" class="title-cell name-head">NAMA SISWA</th>
+          <th rowspan="3" class="title-cell lp-head">L/P</th>
           <th colspan="${days.length}" class="title-cell month-cell">${escapeHtml(report.monthLabel || "")}</th>
           <th rowspan="3" class="title-cell count-head">Hadir</th>
           <th rowspan="3" class="title-cell count-head">Sakit</th>
@@ -999,8 +1000,6 @@ function buildReportTable(report) {
     </table>
   `;
 }
-
-
 
 function buildReportHtml(report) {
   const className = report?.class?.name || "";
@@ -1059,11 +1058,11 @@ function buildReportHtml(report) {
     width: 100%;
     border-collapse: collapse;
     table-layout: fixed;
-    font-size: 7.5px;
+    font-size: 7px;
   }
   .report-table th, .report-table td {
     border: 1px solid #000;
-    padding: 1.5px 2px;
+    padding: 1px 2px;
     text-align: center;
     vertical-align: middle;
     word-break: normal;
@@ -1071,32 +1070,37 @@ function buildReportHtml(report) {
   .report-table .left {
     text-align: left;
   }
-  .report-table .num-cell,
-  .report-table .student-nisn,
-  .report-table .student-name {
+  .report-table .num-cell {
     white-space: nowrap;
-  }
-  .report-table .student-name {
-    font-size: 7.2px;
+    width: 3ch;
   }
   .report-table .student-nisn {
-    font-size: 7.3px;
+    white-space: nowrap;
+    width: 8ch;
+  }
+  .report-table .student-name {
+    white-space: nowrap;
+    width: 16ch;
+    font-size: 6.9px;
   }
   .report-table .title-cell {
     font-weight: 700;
     background: #f2f2f2;
-    font-size: 7.8px;
+    font-size: 7.7px;
+    line-height: 1.05;
   }
   .report-table .month-cell {
     font-size: 8px;
   }
   .report-table .date-head {
-    font-size: 7px;
+    font-size: 6.7px;
     padding: 1px 0;
+    white-space: nowrap;
   }
   .day-cell {
     font-weight: 700;
     font-size: 8px;
+    white-space: nowrap;
   }
   .status-h { color: #000; }
   .status-s { color: #d97706; }
@@ -1104,6 +1108,7 @@ function buildReportHtml(report) {
   .status-a { color: #dc2626; }
   .count {
     font-weight: 700;
+    white-space: nowrap;
   }
   .report-footer {
     margin-top: 14px;
@@ -1112,7 +1117,7 @@ function buildReportHtml(report) {
   }
   .report-footer .block {
     width: 260px;
-    text-align: left;
+    text-align: right;
     font-size: 11px;
   }
   .report-footer .date {
@@ -1150,46 +1155,62 @@ function buildReportHtml(report) {
 </html>`;
 }
 
-
-
 async function printMonthlyReport() {
   try {
     const report = await loadMonthlyReportData();
     const html = buildReportHtml(report);
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) {
-      throw new Error("Popup diblokir browser. Izinkan popup untuk mencetak laporan.");
-    }
+    const iframe = document.createElement("iframe");
+    iframe.style.position = "fixed";
+    iframe.style.right = "0";
+    iframe.style.bottom = "0";
+    iframe.style.width = "0";
+    iframe.style.height = "0";
+    iframe.style.border = "0";
+    iframe.style.opacity = "0";
+    iframe.style.pointerEvents = "none";
+    iframe.srcdoc = html;
+    document.body.appendChild(iframe);
 
-    printWindow.document.open();
-    printWindow.document.write(html);
-    printWindow.document.close();
-
-    const triggerPrint = () => {
-      try {
-        printWindow.focus();
-        printWindow.print();
-      } catch (err) {
-        console.error(err);
-      }
+    const cleanup = () => {
+      setTimeout(() => {
+        try { iframe.remove(); } catch (err) {}
+      }, 1000);
     };
 
-    if (printWindow.document.readyState === "complete") {
-      setTimeout(triggerPrint, 600);
-    } else {
-      printWindow.addEventListener("load", () => setTimeout(triggerPrint, 600), { once: true });
-      setTimeout(triggerPrint, 1200);
-    }
+    iframe.onload = () => {
+      setTimeout(() => {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } catch (err) {
+          console.error(err);
+          showError(new Error("Gagal membuka dialog cetak."));
+        } finally {
+          cleanup();
+        }
+      }, 500);
+    };
+
+    setTimeout(() => {
+      if (document.body.contains(iframe)) {
+        try {
+          iframe.contentWindow?.focus();
+          iframe.contentWindow?.print();
+        } catch (err) {
+          console.error(err);
+        }
+        cleanup();
+      }
+    }, 2000);
   } catch (error) {
     showError(error);
   }
 }
-
-
 function styleCell(cell, style) {
   cell.s = style;
   return cell;
 }
+
 
 
 function createReportWorkbook(report) {
@@ -1229,43 +1250,47 @@ function createReportWorkbook(report) {
     data.push(row);
   });
 
-  const blankRowCount = 7;
-  for (let i = 0; i < blankRowCount; i += 1) {
+  const footerDateRow = data.length + 2; // 2 baris kosong setelah data
+  const footerNameRow = footerDateRow + 5; // 4 baris kosong di antara tanggal dan nama
+
+  while (data.length <= footerNameRow) {
     data.push([]);
   }
 
   const ws = XLSX.utils.aoa_to_sheet(data);
 
-  const colWeights = [
-    6, 12, 24, 6,
-    ...days.map(() => 1),
+  const colWidths = [
+    6, 10, 22, 6,
+    ...days.map(() => 3.4),
     5, 5, 5, 5,
   ];
-  const totalWeight = colWeights.reduce((sum, value) => sum + value, 0);
-  ws["!cols"] = colWeights.map((weight) => ({ wch: Math.max(3, Math.round((weight / totalWeight) * 120)) }));
+  ws["!cols"] = colWidths.map((width) => ({ wch: width }));
 
-  const maxCol = 4 + days.length + 4 - 1;
-  const studentStartRow = 7;
-  const footerDateRow = studentStartRow + students.length + 2;
-  const footerNameRow = footerDateRow + 5;
-
+  const lastCol = 7 + days.length;
   const merges = [
-    { s: { r: 0, c: 0 }, e: { r: 0, c: maxCol } },
-    { s: { r: 1, c: 0 }, e: { r: 1, c: maxCol } },
-    { s: { r: 2, c: 0 }, e: { r: 2, c: maxCol } },
+    { s: { r: 0, c: 0 }, e: { r: 0, c: lastCol } },
+    { s: { r: 1, c: 0 }, e: { r: 1, c: lastCol } },
+    { s: { r: 2, c: 0 }, e: { r: 2, c: lastCol } },
     { s: { r: 4, c: 0 }, e: { r: 4, c: 1 } },
-    { s: { r: 4, c: 2 }, e: { r: 5, c: 2 } },
-    { s: { r: 4, c: 3 }, e: { r: 5, c: 3 } },
+    { s: { r: 4, c: 2 }, e: { r: 6, c: 2 } },
+    { s: { r: 4, c: 3 }, e: { r: 6, c: 3 } },
     { s: { r: 4, c: 4 }, e: { r: 4, c: 3 + days.length } },
     { s: { r: 5, c: 4 }, e: { r: 5, c: 3 + days.length } },
     { s: { r: 4, c: 4 + days.length }, e: { r: 6, c: 4 + days.length } },
     { s: { r: 4, c: 5 + days.length }, e: { r: 6, c: 5 + days.length } },
     { s: { r: 4, c: 6 + days.length }, e: { r: 6, c: 6 + days.length } },
     { s: { r: 4, c: 7 + days.length }, e: { r: 6, c: 7 + days.length } },
-    { s: { r: footerDateRow, c: 0 }, e: { r: footerDateRow, c: maxCol } },
-    { s: { r: footerNameRow, c: 0 }, e: { r: footerNameRow, c: maxCol } },
+    { s: { r: footerDateRow, c: 0 }, e: { r: footerDateRow, c: lastCol } },
+    { s: { r: footerNameRow, c: 0 }, e: { r: footerNameRow, c: lastCol } },
   ];
   ws["!merges"] = merges;
+
+  const thinBorder = {
+    top: { style: "thin", color: { rgb: "000000" } },
+    bottom: { style: "thin", color: { rgb: "000000" } },
+    left: { style: "thin", color: { rgb: "000000" } },
+    right: { style: "thin", color: { rgb: "000000" } },
+  };
 
   const styleTitle = {
     font: { bold: true, sz: 14 },
@@ -1275,21 +1300,11 @@ function createReportWorkbook(report) {
     font: { bold: true },
     alignment: { horizontal: "center", vertical: "center", wrapText: true },
     fill: { patternType: "solid", fgColor: { rgb: "F2F2F2" } },
-    border: {
-      top: { style: "thin", color: { rgb: "000000" } },
-      bottom: { style: "thin", color: { rgb: "000000" } },
-      left: { style: "thin", color: { rgb: "000000" } },
-      right: { style: "thin", color: { rgb: "000000" } },
-    },
+    border: thinBorder,
   };
   const styleBody = {
     alignment: { horizontal: "center", vertical: "center", wrapText: false },
-    border: {
-      top: { style: "thin", color: { rgb: "000000" } },
-      bottom: { style: "thin", color: { rgb: "000000" } },
-      left: { style: "thin", color: { rgb: "000000" } },
-      right: { style: "thin", color: { rgb: "000000" } },
-    },
+    border: thinBorder,
   };
   const styleLeft = {
     ...styleBody,
@@ -1298,16 +1313,27 @@ function createReportWorkbook(report) {
   const styleFooter = {
     alignment: { horizontal: "right", vertical: "center", wrapText: false },
   };
+  const styleFooterName = {
+    font: { bold: true },
+    alignment: { horizontal: "right", vertical: "center", wrapText: false },
+  };
 
   const statusStyle = {
-    H: { font: { bold: true, color: { rgb: "000000" } }, alignment: { horizontal: "center" } },
-    S: { font: { bold: true, color: { rgb: "D97706" } }, alignment: { horizontal: "center" } },
-    I: { font: { bold: true, color: { rgb: "2563EB" } }, alignment: { horizontal: "center" } },
-    A: { font: { bold: true, color: { rgb: "DC2626" } }, alignment: { horizontal: "center" } },
+    H: { font: { bold: true, color: { rgb: "000000" } }, alignment: { horizontal: "center", vertical: "center" }, border: thinBorder },
+    S: { font: { bold: true, color: { rgb: "D97706" } }, alignment: { horizontal: "center", vertical: "center" }, border: thinBorder },
+    I: { font: { bold: true, color: { rgb: "2563EB" } }, alignment: { horizontal: "center", vertical: "center" }, border: thinBorder },
+    A: { font: { bold: true, color: { rgb: "DC2626" } }, alignment: { horizontal: "center", vertical: "center" }, border: thinBorder },
   };
 
   function setCell(addr, value, style) {
     ws[addr] = styleCell({ t: typeof value === "number" ? "n" : "s", v: value }, style);
+  }
+
+  function ensureBorder(addr, style = styleBody) {
+    if (!ws[addr]) {
+      ws[addr] = { t: "s", v: "" };
+    }
+    ws[addr].s = { ...(ws[addr].s || {}), ...style };
   }
 
   // Titles
@@ -1336,7 +1362,7 @@ function createReportWorkbook(report) {
 
   // Body
   students.forEach((student, idx) => {
-    const rowNumber = studentStartRow + idx;
+    const rowNumber = 7 + idx;
     const values = [
       idx + 1,
       student.nisn || "",
@@ -1361,9 +1387,23 @@ function createReportWorkbook(report) {
     });
   });
 
+  // Border grid for the full table area so the lines are complete.
+  for (let r = 4; r < 7 + students.length; r += 1) {
+    for (let c = 0; c <= lastCol; c += 1) {
+      const addr = XLSX.utils.encode_cell({ r, c });
+      if (!ws[addr]) {
+        ws[addr] = { t: "s", v: "" };
+      }
+      ws[addr].s = {
+        ...(ws[addr].s || {}),
+        border: thinBorder,
+      };
+    }
+  }
+
   // Footer
   setCell(XLSX.utils.encode_cell({ r: footerDateRow, c: 0 }), `Bandung, ${monthLabel}`, styleFooter);
-  setCell(XLSX.utils.encode_cell({ r: footerNameRow, c: 0 }), HEADMASTER_NAME, styleFooter);
+  setCell(XLSX.utils.encode_cell({ r: footerNameRow, c: 0 }), HEADMASTER_NAME, styleFooterName);
 
   // Row heights
   ws["!rows"] = [
@@ -1378,7 +1418,8 @@ function createReportWorkbook(report) {
   for (let i = 0; i < students.length; i += 1) {
     ws["!rows"].push({ hpt: 18 });
   }
-  for (let i = 0; i < blankRowCount; i += 1) {
+  const totalRowsNeeded = footerNameRow + 1;
+  while (ws["!rows"].length < totalRowsNeeded) {
     ws["!rows"].push({ hpt: 18 });
   }
   ws["!rows"][footerDateRow] = { hpt: 18 };
@@ -1390,8 +1431,6 @@ function createReportWorkbook(report) {
   XLSX.utils.book_append_sheet(wb, ws, "Laporan");
   return wb;
 }
-
-
 async function exportMonthlyReportExcel() {
   try {
     const report = await loadMonthlyReportData();
