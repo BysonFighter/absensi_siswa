@@ -81,7 +81,7 @@
   .top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .actions-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
   .iconbtn, .btn, .select, .input {
-    border:1px solid var(--line);
+    border:1px solid rgba(255,122,0,.18);
     background:#fff;
     border-radius:16px;
     padding:12px 14px;
@@ -301,7 +301,11 @@
     text-align:center;
     cursor:pointer;
   }
-  .sheetbtn.blue { background:var(--blue); color:#fff; border-color:var(--blue); }
+  .sheetbtn.blue {
+    background:rgba(37,99,235,.10);
+    color:#1d4ed8;
+    border:1px solid rgba(37,99,235,.25);
+}
   .sheetbtn.green { background:#ecfdf5; color:#047857; border-color:#bbf7d0; }
   .sheetbtn.amber { background:#fffbeb; color:#b45309; border-color:#fde68a; }
   .sheetbtn.rose { background:#fff1f2; color:#be123c; border-color:#fecdd3; }
