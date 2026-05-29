@@ -606,6 +606,29 @@
     flex-wrap:wrap;
   }
 
+  .pin-sheet{
+  width:min(560px, calc(100vw - 32px));
+  max-height:90vh;
+  overflow:auto;
+  padding:22px 22px 20px;
+  border-radius:26px;
+  box-sizing:border-box;
+}
+
+.pin-sheet .field{
+  width:100%;
+}
+
+.pin-sheet .input{
+  width:100%;
+  box-sizing:border-box;
+}
+
+.pin-sheet .sheetgrid{
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+}
+  
   #loginPage .remember {
     display:flex;
     align-items:center;
@@ -823,7 +846,7 @@
 </div>
 
 <div class="overlay" id="pinOverlay" style="display:none;">
-  <div class="sheet" style="max-width:560px; border-radius:26px; margin-bottom:0;">
+  <div class="sheet pin-sheet">
     <div class="sheetbar"></div>
 
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
