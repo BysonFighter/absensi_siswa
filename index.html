@@ -1033,10 +1033,10 @@ function buildReportTable(report) {
         <td class="left student-name">${escapeHtml(student.name || "")}</td>
         <td>${escapeHtml(student.gender || "L")}</td>
         ${cells}
-        <td class="count">${totals.H || 0}</td>
-        <td class="count">${totals.S || 0}</td>
-        <td class="count">${totals.I || 0}</td>
-        <td class="count">${totals.A || 0}</td>
+        <td class="count">${totals.H > 0 ? totals.H : ""}</td>
+        <td class="count">${totals.S > 0 ? totals.S : ""}</td>
+        <td class="count">${totals.I > 0 ? totals.I : ""}</td>
+        <td class="count">${totals.A > 0 ? totals.A : ""}</td>
       </tr>
     `;
   }).join("");
@@ -1317,10 +1317,10 @@ function createReportWorkbook(report) {
       student.name || "",
       student.gender || "L",
       ...days.map((day) => student.attendance?.[day.date] || ""),
-      totals.H || 0,
-      totals.S || 0,
-      totals.I || 0,
-      totals.A || 0,
+      totals.H > 0 ? totals.H : "",
+      totals.S > 0 ? totals.S : "",
+      totals.I > 0 ? totals.I : "",
+      totals.A > 0 ? totals.A : "",
     ];
     data.push(row);
   });
