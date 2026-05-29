@@ -1200,10 +1200,15 @@ function buildReportHtml(report) {
   }
   .report-footer .date {
     white-space: nowrap;
-    margin-bottom: 70px;
+    margin-bottom: 4px;
   }
   
-  .report-footer .spacer {
+  .report-footer .position {
+    white-space: nowrap;
+    margin-bottom: 55px;
+  }
+  
+  .report-footer .signature-space {
     height: 0;
   }
 </style>
@@ -1227,7 +1232,7 @@ function buildReportHtml(report) {
       <div class="block">
         <div class="date">Bandung, ${titleMonth}</div>
         <div class="position">Kepala Sekolah</div>
-        <div class="spacer"></div>
+        <div class="signature-space"></div>
         <div><strong>${HEADMASTER_NAME}</strong></div>
       </div>
     </div>
