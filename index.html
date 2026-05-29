@@ -1355,8 +1355,6 @@ function createReportWorkbook(report) {
     { s: { r: 4, c: 5 + days.length }, e: { r: 6, c: 5 + days.length } },
     { s: { r: 4, c: 6 + days.length }, e: { r: 6, c: 6 + days.length } },
     { s: { r: 4, c: 7 + days.length }, e: { r: 6, c: 7 + days.length } },
-    { s: { r: footerDateRow, c: 0 }, e: { r: footerDateRow, c: lastCol } },
-    { s: { r: footerNameRow, c: 0 }, e: { r: footerNameRow, c: lastCol } },
   ];
   ws["!merges"] = merges;
 
@@ -1480,20 +1478,9 @@ function createReportWorkbook(report) {
     }
   }
 
-    // Footer
-  const signStartCol = Math.max(0, lastCol - 4);
-
-  const mergeFooterRow = (r) => {
-    ws["!merges"].push({
-      s: { r, c: signStartCol },
-      e: { r, c: lastCol }
-    });
-  };
-
-  // Tanggal
-  mergeFooterRow(footerDateRow);
+      // Footer
   setCell(
-    XLSX.utils.encode_cell({ r: footerDateRow, c: signStartCol }),
+    XLSX.utils.encode_cell({ r: footerDateRow, c: 0 }),
     `Bandung, ${monthLabel}`,
     {
       font: { italic: true },
@@ -1501,10 +1488,8 @@ function createReportWorkbook(report) {
     }
   );
 
-  // Jabatan
-  mergeFooterRow(footerDateRow + 1);
   setCell(
-    XLSX.utils.encode_cell({ r: footerDateRow + 1, c: signStartCol }),
+    XLSX.utils.encode_cell({ r: footerDateRow + 1, c: 0 }),
     "Kepala Sekolah",
     {
       font: { bold: true },
@@ -1512,38 +1497,8 @@ function createReportWorkbook(report) {
     }
   );
 
-  // Ruang tanda tangan kosong
-  mergeFooterRow(footerDateRow + 2);
   setCell(
-    XLSX.utils.encode_cell({ r: footerDateRow + 2, c: signStartCol }),
-    "",
-    {
-      alignment: { horizontal: "right", vertical: "center", wrapText: false }
-    }
-  );
-
-  mergeFooterRow(footerDateRow + 3);
-  setCell(
-    XLSX.utils.encode_cell({ r: footerDateRow + 3, c: signStartCol }),
-    "",
-    {
-      alignment: { horizontal: "right", vertical: "center", wrapText: false }
-    }
-  );
-
-  mergeFooterRow(footerDateRow + 4);
-  setCell(
-    XLSX.utils.encode_cell({ r: footerDateRow + 4, c: signStartCol }),
-    "",
-    {
-      alignment: { horizontal: "right", vertical: "center", wrapText: false }
-    }
-  );
-
-  // Nama kepala sekolah
-  mergeFooterRow(footerNameRow);
-  setCell(
-    XLSX.utils.encode_cell({ r: footerNameRow, c: signStartCol }),
+    XLSX.utils.encode_cell({ r: footerNameRow, c: 0 }),
     HEADMASTER_NAME,
     {
       font: { bold: true },
