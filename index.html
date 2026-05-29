@@ -506,7 +506,7 @@
       <button class="sheetbtn blue" id="allI">Semua Izin</button>
       <button class="sheetbtn rose" id="allA">Semua Alpha</button>
       
-      <button class="sheetbtn full blue" id="saveBtn2">Simpan Absensi</button>
+      <button class="sheetbtn full blue" id="saveBtn2">Simpan Presensi</button>
     </div>
     <div class="small" style="margin-top:12px">
       Data Kehadiran disimpan ke database hanya saat klik tombol simpan.
@@ -777,7 +777,7 @@ function currentAttendanceCounts() {
 }
 
 function syncSaveButtons() {
-  const label = state.dirtyAttendance ? "Simpan Absensi *" : "Simpan Absensi";
+  const label = state.dirtyAttendance ? "Simpan Presensi *" : "Simpan Presensi";
   el("#saveBtn").textContent = label;
   el("#saveBtn2").textContent = label;
 }
@@ -867,7 +867,7 @@ function renderList() {
 function render() {
   renderTop();
   renderList();
-  document.title = `${classLabel(state.classCode)} - Absensi SD YPU 2026`;
+  document.title = `${classLabel(state.classCode)} - SISTEM PRESENSI SD YPU`;
 }
 
 function setAttendanceLocal(studentId, status) {
@@ -906,7 +906,7 @@ async function saveAttendance() {
 
     state.dirtyAttendance = false;
     renderTop();
-    setToast("Absensi tersimpan");
+    setToast("Presensi tersimpan");
   } catch (error) {
     showError(error);
   }
@@ -1528,7 +1528,7 @@ function statusLetterForExcel(status) {
 
 async function confirmDiscardIfDirty() {
   if (!state.dirtyAttendance) return true;
-  return confirm("Ada perubahan absensi yang belum disimpan. Lanjutkan dan buang perubahan ini?");
+  return confirm("Ada perubahan Presensi yang belum disimpan. Lanjutkan dan buang perubahan ini?");
 }
 
 async function changeClass(nextClassCode) {
@@ -1706,7 +1706,7 @@ async function moveRoster() {
 
 async function deleteClassRoster() {
   if (!isSixthClass(state.classCode)) return;
-  const ok = confirm(`Hapus semua siswa dan absensi untuk ${classLabel(state.classCode)}? Tindakan ini tidak bisa dibatalkan.`);
+  const ok = confirm(`Hapus semua siswa dan Presensi untuk ${classLabel(state.classCode)}? Tindakan ini tidak bisa dibatalkan.`);
   if (!ok) return;
   try {
     await apiPost("deleteClassRoster", { classCode: state.classCode });
