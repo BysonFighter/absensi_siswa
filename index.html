@@ -38,13 +38,13 @@
   }
 
   .school-logo {
-    height: 58px;
+    height: 60px;
     width: auto;
     display: block;
     flex: 0 0 auto;
     filter: drop-shadow(0 8px 18px rgba(0,0,0,.08));
     position: relative;
-    top: -2px;
+    top: -1px;
   }
   .wrap { max-width:1100px; margin:0 auto; padding:18px 14px 104px; }
   .card {
@@ -437,12 +437,23 @@
     .date-row { grid-template-columns:auto 1fr auto; }
     .roster-row-grid { grid-template-columns:1fr 1fr; }
   }
+  @media (max-width:520px) {
+    #loginPage .login-shell > .card { padding:24px 22px 22px; }
+    #loginPage .login-title { font-size:24px; }
+    #loginPage .login-subtitle { font-size:14px; }
+    #loginPage .login-note { font-size:12px; }
+  }
 
   .page { display:none; min-height:100vh; }
   .page.active { display:block; }
   body:not(.app-ready) #appPage,
   body:not(.app-ready) .bottom,
   body:not(.app-ready) .overlay {
+    display:none !important;
+  }
+
+  #loginPage.active ~ .bottom,
+  #loginPage.active ~ .overlay {
     display:none !important;
   }
 
@@ -461,7 +472,7 @@
   #loginPage .login-shell {
     position:relative;
     width:100%;
-    max-width:580px;
+    max-width:680px;
   }
 
   #loginPage .login-shell::before {
@@ -477,29 +488,30 @@
   #loginPage .login-shell > .card {
     position:relative;
     z-index:1;
-    padding:30px 32px 28px;
+    padding:42px 46px 36px;
+    border-radius:36px;
   }
 
   #loginPage .login-title {
-    margin:10px 0 6px;
-    font-size:26px;
-    line-height:1.1;
+    margin:12px 0 6px;
+    font-size:25px;
+    line-height:1.08;
     font-weight:800;
     letter-spacing:-0.02em;
   }
 
   #loginPage .login-subtitle {
-    margin:0 0 22px;
+    margin:0 0 20px;
     color:var(--muted);
-    font-size:15px;
+    font-size:14px;
     line-height:1.55;
   }
 
   #loginPage .login-note {
-    margin-top:18px;
+    margin-top:20px;
     text-align:center;
     color:var(--muted);
-    font-size:13px;
+    font-size:12px;
     line-height:1.6;
   }
 
@@ -525,7 +537,7 @@
     align-items:center;
     justify-content:space-between;
     gap:12px;
-    margin:12px 0 24px;
+    margin:14px 0 4px;
     flex-wrap:wrap;
   }
 
@@ -547,11 +559,40 @@
   #loginPage .forgot {
     color:#d61f26;
     text-decoration:none;
-    font-size:15px;
+    font-size:14px;
     font-weight:700;
   }
 
   #loginPage .forgot:hover { text-decoration:underline; }
+
+
+#loginPage form {
+    display:flex;
+    flex-direction:column;
+    gap:16px;
+  }
+
+  #loginPage .field {
+    margin-bottom:0;
+  }
+
+  #loginPage .field label {
+    margin-bottom:10px;
+  }
+
+  #loginPage .select,
+  #loginPage .input,
+  #loginPage .btn.primary {
+    width:100%;
+    display:block;
+    box-sizing:border-box;
+  }
+
+  #loginPage .btn.primary {
+    min-height:56px;
+    padding:15px 18px;
+    margin-top:2px;
+  }
 
 </style>
 </head>
@@ -588,7 +629,7 @@
               <input type="checkbox" id="rememberLogin">
               Ingat saya
             </label>
-            <a href="#" class="forgot" id="clearSaved">Hapus sesi</a>
+            <a href="#" class="forgot" id="clearSaved">Lupa pin</a>
           </div>
 
           <button class="btn primary" type="submit" id="loginBtn">Masuk</button>
