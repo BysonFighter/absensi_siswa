@@ -1525,6 +1525,11 @@ function createReportWorkbook(report) {
     }
   );
 
+  const range = XLSX.utils.decode_range(ws["!ref"]);
+  range.e.r = Math.max(range.e.r, footerNameRow);
+  range.e.c = Math.max(range.e.c, lastCol);
+  ws["!ref"] = XLSX.utils.encode_range(range);
+
   // Row heights
   ws["!rows"] = [
     { hpt: 18 },
