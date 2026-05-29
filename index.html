@@ -3,56 +3,70 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Sistem Presensi SD YPU</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800;900&display=swap" rel="stylesheet"/>
+<title>SD YPU - Sistem Informasi Sekolah</title>
 <style>
   :root {
-    --bg:#f4f7fb;
-    --card:#fff;
-    --text:#0f172a;
-    --muted:#64748b;
-    --line:#e2e8f0;
-    --blue:#2563eb;
-    --green:#16a34a;
-    --amber:#d97706;
-    --rose:#e11d48;
-    --slate:#334155;
+    --bg: linear-gradient(135deg, #c1121f 0%, #ff5e00 50%, #ffcc00 100%);
+    --card: rgba(255, 248, 240, 0.95);
+    --text: #1f2937;
+    --muted: #6b7280;
+    --line: rgba(214, 31, 38, 0.10);
+    --blue: #ff7a00;
+    --green: #16a34a;
+    --amber: #ff9f1a;
+    --rose: #ff3d2e;
+    --slate: #5b4b3c;
   }
   * { box-sizing:border-box; }
   body {
     margin:0;
-    font-family: Arial, Helvetica, sans-serif;
-    background:var(--bg);
+    font-family: 'Poppins', Arial, Helvetica, sans-serif;
+    min-height: 100vh;
+    background:
+      radial-gradient(circle at 12% 12%, rgba(255, 204, 51, 0.28), transparent 22%),
+      radial-gradient(circle at 88% 82%, rgba(255, 122, 0, 0.24), transparent 24%),
+      var(--bg);
     color:var(--text);
   }
-  .brand {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.school-logo {
-  height: 60px;
-  width: auto;
-  display: block;
-  align:center;
-  flex: 0 0 auto;
-}
   .brand {
     display: flex;
     align-items: center;
     gap: 16px;
-}
-  .wrap { max-width:1100px; margin:0 auto; padding:14px 12px 92px; }
+    flex-wrap: wrap;
+  }
+
+  .school-logo {
+    height: 68px;
+    width: auto;
+    display: block;
+    flex: 0 0 auto;
+    filter: drop-shadow(0 8px 18px rgba(0,0,0,.08));
+  }
+  .wrap { max-width:1100px; margin:0 auto; padding:18px 14px 104px; }
   .card {
     background:var(--card);
-    border:1px solid var(--line);
-    border-radius:24px;
-    box-shadow:0 8px 24px rgba(15,23,42,.05);
+    border:1px solid rgba(255,255,255,.35);
+    border-radius:28px;
+    box-shadow:0 18px 50px rgba(0,0,0,.12);
     padding:16px;
     margin-bottom:12px;
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
   }
-  h1 { margin:0; font-size:28px; line-height:1.1; }
-  .sub { color:var(--muted); margin:8px 0 0; line-height:1.5; font-size:14px; }
+  h1 { 
+    margin:0; 
+    font-size:38px; 
+    line-height:1.02; 
+    font-weight:900;
+    letter-spacing:0.5px;
+    background: linear-gradient(90deg, #d61f26 0%, #ff7a00 55%, #ffcc33 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    text-shadow: 0 2px 0 rgba(255,255,255,.42);
+  }
+  .sub { color:var(--muted); margin:8px 0 0; line-height:1.5; font-size:15px; font-weight:600; }
   .top { display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .actions-top { display:flex; align-items:center; gap:8px; flex-wrap:wrap; justify-content:flex-end; }
   .iconbtn, .btn, .select, .input {
@@ -73,12 +87,12 @@
     outline:none;
     width:100%;
   }
-  .btn.primary { background:var(--blue); color:#fff; border-color:var(--blue); }
-  .btn.success { background:#ecfdf5; color:#047857; border-color:#bbf7d0; }
-  .btn.warn { background:#fffbeb; color:#b45309; border-color:#fde68a; }
+  .btn.primary { background:linear-gradient(90deg, #ff2d2d 0%, #ff7a00 55%, #ffcc33 100%); color:#fff; border-color:transparent; box-shadow:0 12px 24px rgba(255,94,0,.28); }
+  .btn.success { background:#fff5e8; color:#c2410c; border-color:#ffd59a; }
+  .btn.warn { background:#fff7ed; color:#c2410c; border-color:#ffd59a; }
   .btn.danger { background:#fff1f2; color:#be123c; border-color:#fecdd3; }
-  .btn.secondary { background:#f8fafc; color:var(--slate); }
-  .btn.softblue { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
+  .btn.secondary { background:rgba(255,255,255,.92); color:var(--slate); border-color:rgba(255,122,0,.12); }
+  .btn.softblue { background:#fff4e6; color:#d97706; border-color:#ffd59a; }
   .toolbar {
     display:grid;
     grid-template-columns:1fr;
@@ -103,11 +117,12 @@
     align-items:center;
     justify-content:center;
     gap:8px;
-    background:#eff6ff;
-    color:#1d4ed8;
+    background:linear-gradient(90deg, rgba(255,45,45,.08), rgba(255,122,0,.12), rgba(255,204,51,.14));
+    color:#9a3412;
+    border:1px solid rgba(255,122,0,.18);
     border-radius:16px;
     padding:12px 14px;
-    font-weight:700;
+    font-weight:800;
     text-align:center;
     min-height:48px;
   }
@@ -136,17 +151,17 @@
     font-size:12px;
     cursor:pointer;
   }
-  .day.active { background:#eff6ff; border-color:#93c5fd; color:#1d4ed8; }
+  .day.active { background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,245,235,.95)); border-color:#ffb15c; color:#d97706; box-shadow:0 8px 20px rgba(255,122,0,.12); }
   .day:disabled { opacity:.38; cursor:not-allowed; background:#f8fafc; color:#cbd5e1; }
   .day .n { font-size:18px; font-weight:800; margin-top:4px; }
   .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
   .stat { border-radius:16px; padding:12px 10px; text-align:center; border:1px solid var(--line); }
   .stat .num { font-size:22px; font-weight:900; }
   .stat .lab { font-size:12px; font-weight:700; margin-top:2px; }
-  .s-H { background:#ecfdf5; color:#047857; border-color:#bbf7d0; }
-  .s-S { background:#fffbeb; color:#b45309; border-color:#fde68a; }
-  .s-I { background:#eff6ff; color:#1d4ed8; border-color:#bfdbfe; }
-  .s-A { background:#fff1f2; color:#be123c; border-color:#fecdd3; }
+  .s-H { background:#fff7ed; color:#c2410c; border-color:#ffd59a; }
+  .s-S { background:#fff1f2; color:#be123c; border-color:#fecdd3; }
+  .s-I { background:#fef3c7; color:#b45309; border-color:#fde68a; }
+  .s-A { background:#ffe4e6; color:#b91c1c; border-color:#fda4af; }
   .searchbar {
     display:flex;
     gap:8px;
@@ -197,17 +212,17 @@
     cursor:pointer;
     font-size:13px;
   }
-  .choice.active.H { background:#ecfdf5; color:#047857; border-color:#86efac; }
-  .choice.active.S { background:#fffbeb; color:#b45309; border-color:#fcd34d; }
-  .choice.active.I { background:#eff6ff; color:#1d4ed8; border-color:#93c5fd; }
-  .choice.active.A { background:#fff1f2; color:#be123c; border-color:#fda4af; }
+  .choice.active.H { background:#fff7ed; color:#c2410c; border-color:#ffb15c; }
+  .choice.active.S { background:#fff1f2; color:#be123c; border-color:#fda4af; }
+  .choice.active.I { background:#fef3c7; color:#b45309; border-color:#fcd34d; }
+  .choice.active.A { background:#ffe4e6; color:#b91c1c; border-color:#fda4af; }
   .bottom {
     position:fixed;
     left:0;
     right:0;
     bottom:0;
-    background:rgba(255,255,255,.96);
-    border-top:1px solid var(--line);
+    background:rgba(255,248,240,.96);
+    border-top:1px solid rgba(255,122,0,.14);
     backdrop-filter: blur(10px);
   }
   .bottom .in {
@@ -379,6 +394,7 @@
     }
   
     .report-actions .btn {
+
       width:100%;
     }
   }
@@ -422,8 +438,8 @@
       <div class="brand">
       <img src="logo-sekolah.png" class="school-logo" alt="Logo">
         <div>
-          <h1>PRESENSI SISWA</h1>
-          <p class="sub">Pilih kelas, masuk pilihan, sesuaikan lalu simpan saat selesai.</p>
+          <h1>SD YPU</h1>
+          <p class="sub">Sistem Informasi Sekolah</p>
         </div>
       </div> 
     </div>
@@ -876,7 +892,7 @@ function renderList() {
 function render() {
   renderTop();
   renderList();
-  document.title = `${classLabel(state.classCode)} - SISTEM PRESENSI SD YPU`;
+  document.title = `SD YPU - ${classLabel(state.classCode)}`;
 }
 
 function setAttendanceLocal(studentId, status) {
