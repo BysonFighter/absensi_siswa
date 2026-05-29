@@ -1488,6 +1488,26 @@ function createReportWorkbook(report) {
   // Footer
   setCell(XLSX.utils.encode_cell({ r: footerDateRow, c: 0 }), `Bandung, ${monthLabel}`, styleFooter);
 
+  const signCol = lastCol - 3; // posisi kanan tabel
+
+setCell(
+  XLSX.utils.encode_cell({ r: footerDateRow, c: signCol }),
+  `Bandung, ${monthLabel}`,
+  styleFooter
+);
+
+setCell(
+  XLSX.utils.encode_cell({ r: footerDateRow + 1, c: signCol }),
+  "Kepala Sekolah",
+  styleFooter
+);
+
+setCell(
+  XLSX.utils.encode_cell({ r: footerDateRow + 6, c: signCol }),
+  HEADMASTER_NAME,
+  styleFooterName
+);
+  
   const signatureStartCol = Math.max(0, lastCol - 4);
   const signatureStyle = {
     alignment: { horizontal: "center", vertical: "center" },
