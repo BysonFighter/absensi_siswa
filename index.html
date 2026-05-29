@@ -796,9 +796,9 @@
     <div class="card report-card">
       
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-        <div>
+        <div style="width:100%">
           <h3 class="section-title">Laporan</h3>
-        </div>        
+        </div>       
       </div>
 
     
@@ -1668,6 +1668,13 @@ function buildReportHtml(report) {
   
   #pinOverlay .sheetgrid{
     grid-template-columns:1fr 1fr;
+  }
+
+  .section-title{
+    margin:0 0 8px 0;
+    text-align:center;
+    font-size:22px;
+    font-weight:800;
   }
   
   @page { size: landscape; margin: 8mm; }
