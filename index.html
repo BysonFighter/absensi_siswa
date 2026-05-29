@@ -1247,6 +1247,10 @@ function createReportWorkbook(report) {
   const row7 = ["URUT", "NISN", "", "", ...days.map((d) => String(d.day)), "", "", "", ""];
   const data = [header1, header2, header3, [], row5, row6, row7, []];
 
+  students.sort((a, b) =>
+    (a.name || "").localeCompare(b.name || "", "id")
+  );
+  
   students.forEach((student, index) => {
     const totals = student.totals || { H: 0, S: 0, I: 0, A: 0 };
     const row = [
