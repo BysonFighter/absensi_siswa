@@ -1506,6 +1506,10 @@ function createReportWorkbook(report) {
     }
   );
 
+  setCell("A30", "TEST TANDA TANGAN", {
+  font: { bold: true }
+});
+
   // Row heights
   ws["!rows"] = [
     { hpt: 18 },
