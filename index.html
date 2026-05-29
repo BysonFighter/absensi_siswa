@@ -822,6 +822,42 @@
   </div>
 </div>
 
+<div class="overlay" id="pinOverlay" style="display:none;">
+  <div class="sheet" style="max-width:560px; border-radius:26px; margin-bottom:0;">
+    <div class="sheetbar"></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div>
+        <div style="font-size:18px;font-weight:900">Ubah PIN</div>
+        <div class="small">Masukkan PIN lama, lalu buat PIN baru.</div>
+      </div>
+      <button class="iconbtn" id="closePinSheet">✕</button>
+    </div>
+
+    <div style="margin-top:14px;display:grid;gap:12px;">
+      <div class="field">
+        <label for="oldPin">PIN Lama</label>
+        <input class="input" id="oldPin" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Masukkan PIN lama">
+      </div>
+
+      <div class="field">
+        <label for="newPin">PIN Baru</label>
+        <input class="input" id="newPin" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Masukkan PIN baru">
+      </div>
+
+      <div class="field">
+        <label for="confirmPin">Konfirmasi PIN Baru</label>
+        <input class="input" id="confirmPin" type="password" inputmode="numeric" pattern="[0-9]*" placeholder="Ulangi PIN baru">
+      </div>
+
+      <div class="sheetgrid">
+        <button class="sheetbtn cream" id="cancelPinBtn">Batal</button>
+        <button class="sheetbtn amber" id="savePinBtn">Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>
+  
 <div class="overlay" id="rosterOverlay">
   <div class="sheet">
     <div class="sheetbar"></div>
@@ -969,6 +1005,62 @@ function syncLoginSelectors() {
   `).join("");
 }
 
+function openChangePinSheet() {
+  el("#pinOverlay").style.display = "flex";
+  el("#oldPin").value = "";
+  el("#newPin").value = "";
+  el("#confirmPin").value = "";
+  setTimeout(() => el("#oldPin")?.focus(), 50);
+}
+
+function closePinSheet() {
+  el("#pinOverlay").style.display = "none";
+}
+
+async function changePin() {
+  const oldPin = el("#oldPin").value.trim();
+  const newPin = el("#newPin").value.trim();
+  const confirmPin = el("#confirmPin").value.trim();
+
+  if (!oldPin || !newPin || !confirmPin) {
+    setToast("Lengkapi semua PIN");
+    return;
+  }
+
+  if (!/^\d+$/.test(oldPin + newPin + confirmPin)) {
+    setToast("PIN hanya angka");
+    return;
+  }
+
+  const currentPin = getLoginPinForClass(state.classCode);
+  if (oldPin !== currentPin) {
+    setToast("PIN lama salah");
+    return;
+  }
+
+  if (newPin !== confirmPin) {
+    setToast("Konfirmasi PIN tidak cocok");
+    return;
+  }
+
+  if (newPin.length < 4) {
+    setToast("PIN minimal 4 digit");
+    return;
+  }
+
+  await apiPost("changePin", {
+    classCode: state.classCode,
+    oldPin,
+    newPin
+  });
+
+  const found = state.classes.find(item => item.code === state.classCode);
+  if (found) found.pin = newPin;
+
+  setToast("PIN berhasil diubah");
+  closePinSheet();
+}
+  
 function getLoginPinForClass(classCode) {
   const found = state.classes.find(item => item.code === classCode);
   const apiPin = found?.pin ? String(found.pin) : "";
@@ -1509,6 +1601,29 @@ function buildReportHtml(report) {
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Laporan ${titleMonth} ${titleClass}</title>
 <style>
+
+  #pinOverlay{
+    position:fixed;
+    inset:0;
+    background:rgba(15,23,42,.45);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    z-index:60;
+    padding:16px;
+  }
+  
+  #pinOverlay .sheet{
+    width:min(560px,100%);
+    border-radius:26px;
+    max-height:90vh;
+    overflow:auto;
+  }
+  
+  #pinOverlay .sheetgrid{
+    grid-template-columns:1fr 1fr;
+  }
+  
   @page { size: landscape; margin: 8mm; }
   * { box-sizing: border-box; }
   body {
@@ -2216,6 +2331,14 @@ el("#classSelect").addEventListener("change", async () => {
   await changeClass(el("#classSelect").value);
 });
 
+el("#openChangePin").addEventListener("click", openChangePinSheet);
+el("#closePinSheet").addEventListener("click", closePinSheet);
+el("#cancelPinBtn").addEventListener("click", closePinSheet);
+el("#pinOverlay").addEventListener("click", (e) => {
+  if (e.target === el("#pinOverlay")) closePinSheet();
+});
+el("#savePinBtn").addEventListener("click", () => changePin().catch(showError));
+  
 el("#rosterClassSelect").addEventListener("change", async () => {
   if (!(await confirmDiscardIfDirty())) {
     el("#rosterClassSelect").value = state.classCode;
