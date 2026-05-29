@@ -15,6 +15,9 @@
     --shadow:0 20px 60px rgba(15,23,42,.12);
     --accent: linear-gradient(90deg,#ff2d2d 0%,#ff7a00 55%,#ffcc33 100%);
     --danger:#be123c;
+    --success:#047857;
+    --warn:#b45309;
+    --info:#1d4ed8;
   }
   *{box-sizing:border-box}
   html,body{height:100%}
@@ -31,6 +34,7 @@
   }
   .page{display:none;min-height:100vh}
   .page.active{display:block}
+
   .shell{
     position:relative;
     width:100%;
@@ -200,7 +204,6 @@
     position:fixed;left:50%;bottom:86px;transform:translateX(-50%);background:#0f172a;color:#fff;border-radius:999px;
     padding:10px 14px;font-size:13px;font-weight:700;z-index:70;display:none;box-shadow:0 12px 30px rgba(0,0,0,.18)
   }
-  .muted{color:var(--muted)}
 
   @media (max-width: 900px){
     .stats,.choices,.sheetgrid{grid-template-columns:repeat(2,1fr)}
@@ -336,7 +339,7 @@
       <button class="sheetbtn full blue" id="saveBtn2">Simpan</button>
     </div>
     <div class="small" style="margin-top:12px">
-      Data presensi disimpan ke browser dulu untuk demo.
+      Data presensi disimpan ke browser dulu untuk demo. Nanti bisa diganti ke backend/database.
     </div>
   </div>
 </div>
@@ -355,15 +358,15 @@
     <div class="subtle-panel">
       <div class="field">
         <label for="oldPin">PIN Lama</label>
-        <input class="input" id="oldPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Masukkan PIN lama">
+        <input class="input pin-field" id="oldPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Masukkan PIN lama">
       </div>
       <div class="field">
         <label for="newPin">PIN Baru</label>
-        <input class="input" id="newPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Masukkan PIN baru">
+        <input class="input pin-field" id="newPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Masukkan PIN baru">
       </div>
       <div class="field">
         <label for="confirmPin">Konfirmasi PIN Baru</label>
-        <input class="input" id="confirmPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Ulangi PIN baru">
+        <input class="input pin-field" id="confirmPin" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="Ulangi PIN baru">
       </div>
       <div class="inline-actions" style="margin-top:16px">
         <button class="btn secondary" id="cancelPinBtn" style="flex:1">Batal</button>
@@ -410,7 +413,8 @@ const state = {
   date: todayIso(),
   students: [],
   attendance: {},
-  dirty: false
+  dirty: false,
+  apiReady: null
 };
 
 function pad2(n){ return String(n).padStart(2,"0"); }
@@ -424,19 +428,12 @@ function parseDate(iso){
 function prettyDate(d){
   return new Intl.DateTimeFormat("id-ID",{weekday:"long",day:"2-digit",month:"long",year:"numeric"}).format(d);
 }
-function startWeek(d){
-  const x = new Date(d);
-  const day = (x.getDay()+6)%7;
-  x.setDate(x.getDate()-day);
-  x.setHours(0,0,0,0);
-  return x;
-}
 function setToast(msg){
   const t = el("#toast");
   t.textContent = msg;
   t.style.display = "block";
   clearTimeout(setToast.timer);
-  setToast.timer = setTimeout(() => t.style.display = "none", 1800);
+  setToast.timer = setTimeout(() => t.style.display = "none", 2000);
 }
 function esc(v){
   return String(v ?? "").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;");
@@ -470,15 +467,111 @@ function loadAttendance(classCode, date){
   if (!raw) return {};
   try { return JSON.parse(raw) || {}; } catch(e){ return {}; }
 }
-function saveAttendance(){
-  localStorage.setItem(getAttendanceKey(state.loggedClass, state.date), JSON.stringify(state.attendance));
-  state.dirty = false;
-  syncDirtyUI();
-  setToast("Presensi tersimpan");
+async function apiFetch(path, options = {}) {
+  const res = await fetch(path, options);
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return res.json();
 }
-function syncDirtyUI(){
-  el("#saveBtn").textContent = state.dirty ? "Simpan *" : "Simpan";
-  el("#saveBtn2").textContent = state.dirty ? "Simpan *" : "Simpan";
+async function getApiClasses() {
+  const candidates = [
+    "/api?action=classes",
+    "./api?action=classes"
+  ];
+  for (const url of candidates) {
+    try {
+      const data = await apiFetch(url, { cache: "no-store" });
+      if (data && data.classes) return data.classes;
+    } catch(e){}
+  }
+  return null;
+}
+async function maybeEnableApi() {
+  if (state.apiReady !== null) return state.apiReady;
+  try {
+    const classes = await getApiClasses();
+    state.apiReady = Array.isArray(classes);
+  } catch(e) {
+    state.apiReady = false;
+  }
+  return state.apiReady;
+}
+async function apiGetStudents(classCode){
+  const urls = [
+    `/api?action=students&classCode=${encodeURIComponent(classCode)}`,
+    `./api?action=students&classCode=${encodeURIComponent(classCode)}`
+  ];
+  for (const url of urls) {
+    try {
+      const data = await apiFetch(url, { cache:"no-store" });
+      if (data && Array.isArray(data.students)) return data.students.map(s => ({
+        id: s.id ?? `${classCode}-${s.nisn ?? Math.random()}`,
+        name: s.name || "",
+        nisn: s.nisn || "",
+        gender: s.gender || "L"
+      }));
+    } catch(e){}
+  }
+  return null;
+}
+async function apiGetAttendance(classCode, date){
+  const urls = [
+    `/api?action=attendance&classCode=${encodeURIComponent(classCode)}&date=${encodeURIComponent(date)}`,
+    `./api?action=attendance&classCode=${encodeURIComponent(classCode)}&date=${encodeURIComponent(date)}`
+  ];
+  for (const url of urls) {
+    try {
+      const data = await apiFetch(url, { cache:"no-store" });
+      if (data && Array.isArray(data.records)) {
+        const map = {};
+        data.records.forEach(r => { map[String(r.studentId)] = { status: r.status || "", note: r.note || "" }; });
+        return map;
+      }
+    } catch(e){}
+  }
+  return null;
+}
+async function apiSaveAttendance(classCode, date, attendanceMap, students){
+  const records = students.map(s => ({
+    studentId: s.id,
+    status: attendanceMap[String(s.id)]?.status || "",
+    note: attendanceMap[String(s.id)]?.note || ""
+  })).filter(r => ["H","S","I","A"].includes(r.status));
+
+  const payload = {
+    action: "saveAttendance",
+    classCode,
+    date,
+    records,
+    replace: true
+  };
+
+  const urls = ["/api", "./api"];
+  for (const url of urls) {
+    try {
+      const res = await apiFetch(url, {
+        method:"POST",
+        headers: {"content-type":"application/json"},
+        body: JSON.stringify(payload)
+      });
+      if (res && (res.ok === true || res.success === true)) return true;
+    } catch(e){}
+  }
+  return false;
+}
+async function apiChangePin(classCode, oldPin, newPin){
+  const payload = { action: "changePin", classCode, oldPin, newPin };
+  const urls = ["/api", "./api"];
+  for (const url of urls) {
+    try {
+      const res = await apiFetch(url, {
+        method:"POST",
+        headers: {"content-type":"application/json"},
+        body: JSON.stringify(payload)
+      });
+      if (res && (res.ok === true || res.success === true)) return true;
+    } catch(e){}
+  }
+  return false;
 }
 function syncLoginClasses(){
   const sel = el("#loginClass");
@@ -492,11 +585,16 @@ function showApp(){
   el("#loginPage").classList.remove("active");
   el("#appPage").classList.add("active");
 }
-function openAppForClass(classCode){
+async function openAppForClass(classCode){
   state.loggedClass = classCode;
   localStorage.setItem("sdypu.loggedClass", classCode);
-  state.students = loadStudents(classCode);
-  state.attendance = loadAttendance(classCode, state.date);
+
+  const students = await apiGetStudents(classCode);
+  state.students = students || loadStudents(classCode);
+
+  const attendance = await apiGetAttendance(classCode, state.date);
+  state.attendance = attendance || loadAttendance(classCode, state.date);
+
   state.dirty = false;
   renderApp();
   showApp();
@@ -571,10 +669,19 @@ function bulkSet(status){
   renderList();
   syncDirtyUI();
 }
+function syncDirtyUI(){
+  el("#saveBtn").textContent = state.dirty ? "Simpan *" : "Simpan";
+  el("#saveBtn2").textContent = state.dirty ? "Simpan *" : "Simpan";
+}
 function openOverlay(id){ el(id).style.display = "flex"; }
 function closeOverlay(id){ el(id).style.display = "none"; }
 
-function changePin(){
+function openChangePinSheet(){
+  closeOverlay("#overlay");
+  openOverlay("#pinOverlay");
+  el("#pinClassInfo").textContent = `Kelas ${state.loggedClass}`;
+}
+async function changePin(){
   const oldPin = el("#oldPin").value.trim();
   const newPin = el("#newPin").value.trim();
   const confirmPin = el("#confirmPin").value.trim();
@@ -585,21 +692,57 @@ function changePin(){
   if (newPin.length < 4) return setToast("PIN baru minimal 4 digit");
   if (newPin !== confirmPin) return setToast("Konfirmasi PIN tidak sesuai");
 
-  localStorage.setItem(`sdypu.pin.${state.loggedClass}`, newPin);
-  el("#oldPin").value = "";
-  el("#newPin").value = "";
-  el("#confirmPin").value = "";
-  setToast("PIN berhasil diperbarui");
-  closeOverlay("#pinOverlay");
-  closeOverlay("#overlay");
-}
+  const apiOk = await maybeEnableApi();
+  let success = false;
 
+  if (apiOk) {
+    success = await apiChangePin(state.loggedClass, oldPin, newPin);
+  }
+
+  if (!apiOk || !success) {
+    localStorage.setItem(`sdypu.pin.${state.loggedClass}`, newPin);
+    success = true;
+  }
+
+  if (success) {
+    el("#oldPin").value = "";
+    el("#newPin").value = "";
+    el("#confirmPin").value = "";
+    setToast("PIN berhasil diperbarui");
+    closeOverlay("#pinOverlay");
+    closeOverlay("#overlay");
+  } else {
+    setToast("Gagal memperbarui PIN");
+  }
+}
+async function saveAttendance(){
+  const apiOk = await maybeEnableApi();
+  let success = false;
+
+  if (apiOk) {
+    success = await apiSaveAttendance(state.loggedClass, state.date, state.attendance, state.students);
+  }
+
+  if (!apiOk || !success) {
+    localStorage.setItem(getAttendanceKey(state.loggedClass, state.date), JSON.stringify(state.attendance));
+    success = true;
+  }
+
+  if (success) {
+    state.dirty = false;
+    syncDirtyUI();
+    setToast("Presensi tersimpan");
+  } else {
+    setToast("Gagal menyimpan presensi");
+  }
+}
 function init(){
   syncLoginClasses();
   CLASS_LIST.forEach(c => ensureClassPin(c));
 
   const savedClass = localStorage.getItem("sdypu.loggedClass");
-  if (savedClass) {
+  const remembered = localStorage.getItem("sdypu.remember") === "1";
+  if (savedClass && remembered) {
     state.loggedClass = savedClass;
     state.students = loadStudents(savedClass);
     state.attendance = loadAttendance(savedClass, state.date);
@@ -607,17 +750,30 @@ function init(){
     renderApp();
   }
 
-  el("#loginForm").addEventListener("submit", e => {
+  el("#loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     const classCode = el("#loginClass").value;
     const pin = el("#loginPin").value.trim();
     if (!classCode) return setToast("Pilih kelas terlebih dahulu");
     if (!pin) return setToast("Masukkan PIN");
-    const stored = ensureClassPin(classCode);
-    if (pin !== stored) return setToast("PIN tidak sesuai");
+
+    const apiOk = await maybeEnableApi();
+    let storedPin = ensureClassPin(classCode);
+
+    if (apiOk) {
+      try {
+        const classes = await getApiClasses();
+        const found = classes?.find(c => String(c.code) === String(classCode));
+        if (found && found.pin != null && String(found.pin) !== "") storedPin = String(found.pin);
+      } catch(e){}
+    }
+
+    if (pin !== storedPin) return setToast("PIN tidak sesuai");
+
     localStorage.setItem("sdypu.loggedClass", classCode);
     localStorage.setItem("sdypu.remember", el("#rememberLogin").checked ? "1" : "0");
-    openAppForClass(classCode);
+    await openAppForClass(classCode);
+    el("#loginPin").value = "";
   });
 
   el("#clearSaved").addEventListener("click", e => {
@@ -628,7 +784,7 @@ function init(){
   });
 
   document.querySelectorAll(".input").forEach(inp => {
-    if (inp.type === "password") {
+    if (inp.type === "password" || inp.classList.contains("pin-field")) {
       inp.addEventListener("input", () => { inp.value = inp.value.replace(/\D+/g, ""); });
     }
   });
@@ -650,30 +806,40 @@ function init(){
   el("#closeSheet").addEventListener("click", () => closeOverlay("#overlay"));
   el("#overlay").addEventListener("click", e => { if (e.target === el("#overlay")) closeOverlay("#overlay"); });
 
-  el("#openChangePin").addEventListener("click", () => {
-    closeOverlay("#overlay");
-    openOverlay("#pinOverlay");
-    el("#pinClassInfo").textContent = `Kelas ${state.loggedClass}`;
-  });
+  el("#openChangePin").addEventListener("click", openChangePinSheet);
   el("#closePinSheet").addEventListener("click", () => closeOverlay("#pinOverlay"));
   el("#cancelPinBtn").addEventListener("click", () => closeOverlay("#pinOverlay"));
   el("#pinOverlay").addEventListener("click", e => { if (e.target === el("#pinOverlay")) closeOverlay("#pinOverlay"); });
   el("#savePinBtn").addEventListener("click", changePin);
 
   el("#q").addEventListener("input", renderList);
-  el("#prevDay").addEventListener("click", () => {
+  el("#prevDay").addEventListener("click", async () => {
     const d = parseDate(state.date);
     d.setDate(d.getDate() - 7);
     state.date = todayIso(d);
-    state.attendance = loadAttendance(state.loggedClass, state.date);
+    state.attendance = await (async () => {
+      const apiOk = await maybeEnableApi();
+      if (apiOk) {
+        const att = await apiGetAttendance(state.loggedClass, state.date);
+        if (att) return att;
+      }
+      return loadAttendance(state.loggedClass, state.date);
+    })();
     renderApp();
   });
-  el("#nextDay").addEventListener("click", () => {
+  el("#nextDay").addEventListener("click", async () => {
     const d = parseDate(state.date);
     d.setDate(d.getDate() + 7);
     if (todayIso(d) > todayIso()) return;
     state.date = todayIso(d);
-    state.attendance = loadAttendance(state.loggedClass, state.date);
+    state.attendance = await (async () => {
+      const apiOk = await maybeEnableApi();
+      if (apiOk) {
+        const att = await apiGetAttendance(state.loggedClass, state.date);
+        if (att) return att;
+      }
+      return loadAttendance(state.loggedClass, state.date);
+    })();
     renderApp();
   });
 }
