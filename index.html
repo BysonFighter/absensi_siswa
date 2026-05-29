@@ -33,19 +33,18 @@
   .brand {
     display: flex;
     align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
+    gap: 14px;
+    flex-wrap: nowrap;
   }
 
   .school-logo {
-    height: 54px;
+    height: 58px;
     width: auto;
     display: block;
     flex: 0 0 auto;
     filter: drop-shadow(0 8px 18px rgba(0,0,0,.08));
-
-     position: relative;
-    top: -3px;
+    position: relative;
+    top: -2px;
   }
   .wrap { max-width:1100px; margin:0 auto; padding:18px 14px 104px; }
   .card {
@@ -441,6 +440,16 @@
 
   .page { display:none; min-height:100vh; }
   .page.active { display:block; }
+  body:not(.app-ready) #appPage,
+  body:not(.app-ready) .bottom,
+  body:not(.app-ready) .overlay {
+    display:none !important;
+  }
+
+  body.app-ready .bottom {
+    display:block;
+  }
+
 
   #loginPage.active {
     display:flex;
@@ -452,7 +461,7 @@
   #loginPage .login-shell {
     position:relative;
     width:100%;
-    max-width:460px;
+    max-width:580px;
   }
 
   #loginPage .login-shell::before {
@@ -468,28 +477,29 @@
   #loginPage .login-shell > .card {
     position:relative;
     z-index:1;
+    padding:30px 32px 28px;
   }
 
   #loginPage .login-title {
-    margin:8px 0 6px;
-    font-size:22px;
+    margin:10px 0 6px;
+    font-size:26px;
     line-height:1.1;
     font-weight:800;
     letter-spacing:-0.02em;
   }
 
   #loginPage .login-subtitle {
-    margin:0 0 20px;
+    margin:0 0 22px;
     color:var(--muted);
-    font-size:14px;
+    font-size:15px;
     line-height:1.55;
   }
 
   #loginPage .login-note {
-    margin-top:16px;
+    margin-top:18px;
     text-align:center;
     color:var(--muted);
-    font-size:12px;
+    font-size:13px;
     line-height:1.6;
   }
 
@@ -515,7 +525,7 @@
     align-items:center;
     justify-content:space-between;
     gap:12px;
-    margin:10px 0 22px;
+    margin:12px 0 24px;
     flex-wrap:wrap;
   }
 
@@ -529,15 +539,15 @@
   }
 
   #loginPage .remember input {
-    width:16px;
-    height:16px;
+    width:17px;
+    height:17px;
     accent-color:#ff7a00;
   }
 
   #loginPage .forgot {
     color:#d61f26;
     text-decoration:none;
-    font-size:14px;
+    font-size:15px;
     font-weight:700;
   }
 
@@ -547,7 +557,7 @@
 </head>
 <body>
 
-<div id="loginPage" class="page">
+<div id="loginPage" class="page active">
   <div class="login-shell">
     <div class="card">
       <div class="inner">
@@ -590,7 +600,7 @@
   </div>
 </div>
 
-<div id="appPage" class="page active">
+<div id="appPage" class="page">
 
 <div class="wrap">
   
@@ -806,6 +816,7 @@ function showLoginPage() {
   const app = el("#appPage");
   if (login) login.classList.add("active");
   if (app) app.classList.remove("active");
+  document.body.classList.remove("app-ready");
   document.title = "SD YPU - Login";
 }
 
@@ -814,6 +825,7 @@ function showAppPage() {
   const app = el("#appPage");
   if (login) login.classList.remove("active");
   if (app) app.classList.add("active");
+  document.body.classList.add("app-ready");
   document.title = `SD YPU - ${classLabel(state.classCode)}`;
 }
 
@@ -2084,10 +2096,12 @@ async function init() {
       await loadRosterEditor();
       showAppPage();
     } else {
+      document.body.classList.remove("app-ready");
       showLoginPage();
     }
   } catch (error) {
     showError(error);
+    document.body.classList.remove("app-ready");
     showLoginPage();
   }
 }
