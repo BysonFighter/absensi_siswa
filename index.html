@@ -902,11 +902,11 @@ function reportMonthLabel(month, year) {
 }
 
 function schoolYearLabel() {
-  return "2026/2027";
+  return ACADEMIC_YEAR;
 }
 
 function semesterLabel() {
-  return "GANJIL";
+  return SEMESTER_LABEL;
 }
 
 function statusLabel(status) {
@@ -976,7 +976,7 @@ function buildReportTable(report) {
       <colgroup>${colgroup}</colgroup>
       <thead>
         <tr>
-          <th colspan="2" rowspan="2" class="title-cell nomor-head">NOMOR</th></th>
+          <th colspan="2" class="title-cell nomor-head">NOMOR</th>
           <th rowspan="3" class="title-cell name-head">NAMA SISWA</th>
           <th rowspan="3" class="title-cell lp-head">L/P</th>
           <th colspan="${days.length}" class="title-cell month-cell">${escapeHtml(report.monthLabel || "")}</th>
@@ -986,17 +986,17 @@ function buildReportTable(report) {
           <th rowspan="3" class="title-cell count-head">Alpha</th>
         </tr>
         <tr>
-          
+          <th class="title-cell">URUT</th>
+          <th class="title-cell">NISN</th>
           <th colspan="${days.length}" class="title-cell">Tanggal</th>
         </tr>
         <tr>
-        <th class="title-cell">URUT</th>
-          <th class="title-cell">NISN</th>
-          
+          <th colspan="4" class="title-cell" style="border:none;background:transparent;padding:0;height:0"></th>
           ${headerDays}
         </tr>
       </thead>
       <tbody>
+        <tr class="body-gap"><td colspan="${4 + days.length + 4}"></td></tr>
         ${rows}
       </tbody>
     </table>
@@ -1239,10 +1239,9 @@ function createReportWorkbook(report) {
   const header2 = [`TAHUN PELAJARAN ${schoolYearLabel()}`];
   const header3 = [`Jenis Rombel: Kelas Utama - Nama Rombel: ${classRoom} - ${semesterLabel()} - Wali Kelas: ${teacherName}`];
   const row5 = ["NOMOR", "", "NAMA SISWA", "L/P", ...days.map(() => ""), "Hadir", "Sakit", "Ijin", "Alpha"];
-  const row6 = [ "","","Tanggal", ...days.map(() => ""), "", "", "", ""];
-  const row7 = ["URUT", "NISN", "", "", ...days.map((d) => String(d.day)), "", "", "", ""];
-  
-  const data = [header1, header2, header3, [], row5, row6, row7];
+  const row6 = ["URUT", "NISN", "", "", "Tanggal", ...days.map(() => ""), "", "", "", ""];
+  const row7 = ["", "", "", "", ...days.map((d) => String(d.day)), "", "", "", ""];
+  const data = [header1, header2, header3, [], row5, row6, row7, []];
 
   students.forEach((student, index) => {
     const totals = student.totals || { H: 0, S: 0, I: 0, A: 0 };
@@ -1281,7 +1280,7 @@ function createReportWorkbook(report) {
     { s: { r: 0, c: 0 }, e: { r: 0, c: lastCol } },
     { s: { r: 1, c: 0 }, e: { r: 1, c: lastCol } },
     { s: { r: 2, c: 0 }, e: { r: 2, c: lastCol } },
-    { s: { r: 4, c: 0 }, e: { r: 5, c: 1 } },
+    { s: { r: 4, c: 0 }, e: { r: 4, c: 1 } },
     { s: { r: 4, c: 2 }, e: { r: 6, c: 2 } },
     { s: { r: 4, c: 3 }, e: { r: 6, c: 3 } },
     { s: { r: 4, c: 4 }, e: { r: 4, c: 3 + days.length } },
@@ -1437,9 +1436,9 @@ function createReportWorkbook(report) {
     { hpt: 20 },
     { hpt: 20 },
     { hpt: 20 },
-    { hpt: 18 },
+    { hpt: 6 },
   ];
-  for (let i = 1; i < students.length; i += 1) {
+  for (let i = 0; i < students.length; i += 1) {
     ws["!rows"].push({ hpt: 18 });
   }
   const totalRowsNeeded = footerNameRow + 1;
