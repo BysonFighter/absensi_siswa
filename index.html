@@ -583,15 +583,8 @@
   }
 
   .class-label{
-      display:flex;
-      align-items:left;
-      justify-content:left;
-      padding:6px 0;
-      border:none;
-      background:transparent;
-      color:#808080;
-      font-weight:800;
-      font-size:15px;
+      display:none;
+      
   }
 
   .hidden-select {
@@ -738,7 +731,7 @@
   <div class="card">
     <div class="toolbar">
       <div class="field">
-        <div class="class-label" id="classLabel">Kelas -</div>
+        
         <select class="select hidden-select" id="classSelect"></select>
       </div>
       <div class="date-row">
@@ -1156,7 +1149,7 @@ async function loadClasses() {
   syncClassSelectors();
   syncReportSelectors();
   syncLoginSelectors();
-  el("#classCount").textContent = `${state.classes.length} kelas`;
+  el("#classCount").textContent = classLabel(state.classCode);
   el("#classSelect").value = state.classCode;
   el("#rosterClassSelect").value = state.classCode;
   
@@ -1185,7 +1178,7 @@ async function loadClassData() {
     state.attendance = {};
   }
   state.dirtyAttendance = false;
-  el("#studentCount").textContent = `${state.students.length} siswa aktif`;
+  el("#studentCount").textContent = `Jumlah siswa : ${state.students.length}`;
   render();
 }
 
