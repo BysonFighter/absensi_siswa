@@ -587,6 +587,12 @@
       
   }
 
+  .sheetbtn.cream{
+    background:rgba(255,248,225,.85);
+    color:#8d6e63;
+    border:1px solid rgba(255,183,77,.45);
+  }
+  
   .hidden-select {
     display:none !important;
   }
@@ -714,10 +720,7 @@
           <p class="sub">Sistem Presensi Siswa</p>
         </div>
       </div>
-      <div class="actions-top">
-        <button id="changePinBtn" style="width:140px">Ubah PIN</button>
-        <button id="logoutBtn" style="width:140px">Logout</button>
-      </div>
+      
     </div>
     <div class="brand-meta">
       <div class="meta">
@@ -768,6 +771,10 @@
     <div class="sheetbar"></div>
     
     <div class="card report-card">
+      <div class="sheetgrid" style="margin-top:12px">
+        <button class="sheetbtn amber" id="changePinBtn">Ubah PIN</button>
+        <button class="sheetbtn cream" id="logoutBtn">Logout</button>
+      </div>
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
       <div>
         <div style="font-size:18px;font-weight:900">Laporan</div>
