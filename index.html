@@ -440,7 +440,7 @@ function esc(v){
 }
 function ensureClassPin(classCode){
   const key = `sdypu.pin.${classCode}`;
-  if (!localStorage.getItem(key)) localStorage.setItem(key, DEFAULT_PINS[classCode] || "1234");
+  if (!localStorage.getItem(key)) localStorage.setItem(key, DEFAULT_PINS[classCode] || "123456");
   return localStorage.getItem(key);
 }
 function loadStudents(classCode){
