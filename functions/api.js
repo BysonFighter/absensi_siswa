@@ -115,14 +115,14 @@ function notFound(message = "Route tidak ditemukan") {
 
 async function getClasses(env) {
   const result = await env.DB.prepare(
-    "SELECT code, name, sort_order AS sortOrder, wali_kelas AS waliKelas FROM classes ORDER BY sort_order, code"
+    "SELECT code, name, sort_order AS sortOrder, wali_kelas AS waliKelas, pin FROM classes ORDER BY sort_order, code"
   ).all();
   return result.results || [];
 }
 
 async function getClassByCode(env, classCode) {
   const result = await env.DB.prepare(
-    "SELECT code, name, sort_order AS sortOrder, wali_kelas AS waliKelas FROM classes WHERE code = ?"
+    "SELECT code, name, sort_order AS sortOrder, wali_kelas AS waliKelas, pin FROM classes WHERE code = ?"
   ).bind(classCode).first();
   return result || null;
 }
