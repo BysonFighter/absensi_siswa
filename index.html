@@ -1250,17 +1250,7 @@ async function printMonthlyReport() {
       }, 500);
     };
 
-    setTimeout(() => {
-      if (document.body.contains(iframe)) {
-        try {
-          iframe.contentWindow?.focus();
-          iframe.contentWindow?.print();
-        } catch (err) {
-          console.error(err);
-        }
-        cleanup();
-      }
-    }, 2000);
+    
   } catch (error) {
     showError(error);
   }
