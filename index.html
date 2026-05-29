@@ -966,6 +966,12 @@ function showAppPage() {
   const app = el("#appPage");
   if (login) login.classList.remove("active");
   if (app) app.classList.add("active");
+
+  ["overlay", "pinOverlay", "rosterOverlay"].forEach(id => {
+    const node = el(`#${id}`);
+    if (node) node.style.display = "none";
+  });
+
   document.body.classList.add("app-ready");
   document.title = `SD YPU - ${classLabel(state.classCode)}`;
 }
@@ -1096,6 +1102,17 @@ function loginWithClass(classCode, remember) {
 
 function logoutToLogin() {
   clearAuth();
+
+  ["overlay", "pinOverlay", "rosterOverlay"].forEach(id => {
+    const node = el(`#${id}`);
+    if (node) node.style.display = "none";
+  });
+
+  state.classCode = DEFAULT_CLASS_CODE;
+  reportState.month = Number(localStorage.getItem("absensi-report-month") || (new Date().getMonth() + 1));
+  reportState.year = Number(localStorage.getItem("absensi-report-year") || new Date().getFullYear());
+
+  syncLoginSelectors();
   showLoginPage();
 }
 
