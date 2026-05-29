@@ -1479,7 +1479,7 @@ function createReportWorkbook(report) {
   }
 
         // Footer
-  const signStartCol = Math.max(0, lastCol - 4);
+  const signStartCol = Math.max(0, lastCol - 6);
 
   ws["!merges"].push(
     { s: { r: footerDateRow, c: signStartCol }, e: { r: footerDateRow, c: lastCol } },
@@ -1508,14 +1508,7 @@ function createReportWorkbook(report) {
     }
   );
 
-  setCell(
-    XLSX.utils.encode_cell({ r: footerDateRow + 3, c: signStartCol }),
-    "________________________",
-    {
-      alignment: { horizontal: "center", vertical: "center", wrapText: false }
-    }
-  );
-
+  
   setCell(
     XLSX.utils.encode_cell({ r: footerNameRow, c: signStartCol }),
     HEADMASTER_NAME,
