@@ -753,10 +753,7 @@
       <button class="iconbtn" id="closeSheet">✕</button>
     </div>
       <div class="report-grid">
-        <div class="field">
-          <label for="reportClassSelect">Kelas</label>
-          <select class="select" id="reportClassSelect"></select>
-        </div>
+        
         <div class="field">
           <label for="reportMonthSelect">Bulan</label>
           <select class="select" id="reportMonthSelect"></select>
@@ -877,7 +874,7 @@ const state = {
 };
 
 const reportState = {
-  classCode: localStorage.getItem("absensi-report-class") || DEFAULT_CLASS_CODE,
+  
   month: Number(localStorage.getItem("absensi-report-month") || (new Date().getMonth() + 1)),
   year: Number(localStorage.getItem("absensi-report-year") || new Date().getFullYear()),
 
@@ -1102,7 +1099,7 @@ function syncClassSelectors() {
 }
 
 function syncReportSelectors() {
-  buildClassOptions(el("#reportClassSelect"), reportState.classCode);
+  
   buildMonthOptions(el("#reportMonthSelect"), reportState.month);
   buildYearOptions(el("#reportYearSelect"), reportState.year);
 }
@@ -1133,7 +1130,7 @@ async function loadClasses() {
   el("#classCount").textContent = `${state.classes.length} kelas`;
   el("#classSelect").value = state.classCode;
   el("#rosterClassSelect").value = state.classCode;
-  el("#reportClassSelect").value = reportState.classCode;
+  
   const loginClassSelect = el("#loginClassSelect");
   if (loginClassSelect) {
     loginClassSelect.value = state.classCode;
@@ -1310,7 +1307,7 @@ async function saveAttendance() {
 
 
 async function loadMonthlyReportData() {
-  const classCode = reportState.classCode;
+  const classCode = state.classCode;
   const month = reportState.month;
   const year = reportState.year;
   const data = await apiGet({
@@ -2225,10 +2222,7 @@ el("#allA").addEventListener("click", () => bulkSet("A"));
 el("#saveBtn").addEventListener("click", saveAttendance);
 el("#saveBtn2").addEventListener("click", saveAttendance);
 
-el("#reportClassSelect").addEventListener("change", () => {
-  reportState.classCode = el("#reportClassSelect").value;
-  localStorage.setItem("absensi-report-class", reportState.classCode);
-});
+
 
 el("#reportMonthSelect").addEventListener("change", () => {
   reportState.month = Number(el("#reportMonthSelect").value);
