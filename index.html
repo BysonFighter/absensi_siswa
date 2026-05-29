@@ -582,7 +582,7 @@ const REPORT_MONTHS = [
   { value: 12, label: "Desember" },
 ];
 
-const SEMESTER_LABEL = "Ganjil";
+const SEMESTER_LABEL = "Semester Ganjil";
 const HEADMASTER_NAME = "Isah Aisyah, A.Ma.Pd";
 
 const el = (s) => document.querySelector(s);
@@ -950,7 +950,7 @@ function schoolYearLabel() {
 }
 
 function semesterLabel() {
-  return "GANJIL";
+  return "Semester Ganjil";
 }
 
 function statusLabel(status) {
@@ -1028,7 +1028,7 @@ function buildReportTable(report) {
           <th colspan="2" rowspan="2" class="title-cell nomor-head">NOMOR</th>
           <th rowspan="3" class="title-cell name-head">NAMA SISWA</th>
           <th rowspan="3" class="title-cell lp-head">L/P</th>
-          <th colspan="${days.length}" class="title-cell month-cell">${escapeHtml(report.monthLabel || "")}</th>
+          <th colspan="${days.length}" class="title-cell month-cell">"Bulan "${escapeHtml(report.monthLabel || "")}</th>
           <th rowspan="3" class="title-cell count-head">Hadir</th>
           <th rowspan="3" class="title-cell count-head">Sakit</th>
           <th rowspan="3" class="title-cell count-head">Ijin</th>
