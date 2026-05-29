@@ -722,7 +722,7 @@
           <button class="btn primary" type="submit" id="loginBtn">Masuk</button>
         </form>
 
-        <div class="login-note">PIN sementara menggunakan 1234.</div>
+        <div class="login-note">PIN default 123456.</div>
       </div>
     </div>
   </div>
@@ -1110,6 +1110,11 @@ function applyAuthClass(classCode) {
   syncClassSelectors();
   syncReportSelectors();
   updateClassLabel();
+
+  const classCountEl = el("#classCount");
+  if (classCountEl) {
+    classCountEl.textContent = classLabel(classCode);
+  }
 }
 
 function canUseSavedAuth() {
