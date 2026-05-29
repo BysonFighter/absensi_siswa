@@ -442,7 +442,7 @@
       <div class="brand">
       <img src="logo-sekolah.png" class="school-logo" alt="Logo">
         <div>
-          <h1>SISTEM PRESENSI SD YPU</h1>
+          <h1>ABSENSI SISWA</h1>
           <p class="sub">Pilih kelas, masuk option, sesuaikan lalu simpan saat selesai.</p>
         </div>
       </div> 
@@ -486,7 +486,7 @@
 <div class="bottom">
   <div class="in">
     <button class="btn" id="openSheet2" style="flex:1">Options</button>
-    <button class="btn primary" id="saveBtn" style="flex:1">Simpan Presensi</button>
+    <button class="btn primary" id="saveBtn" style="flex:1">Simpan Absensi</button>
   </div>
 </div>
 
@@ -496,7 +496,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
       <div>
         <div style="font-size:18px;font-weight:900">Options</div>
-        <div class="small">Aksi cepat untuk Presensi hari ini.</div>
+        <div class="small">Aksi cepat untuk Absensi hari ini.</div>
       </div>
       <button class="iconbtn" id="closeSheet">✕</button>
     </div>
@@ -506,7 +506,7 @@
       <button class="sheetbtn blue" id="allI">Semua Izin</button>
       <button class="sheetbtn rose" id="allA">Semua Alpha</button>
       
-      <button class="sheetbtn full blue" id="saveBtn2">Simpan Presensi</button>
+      <button class="sheetbtn full blue" id="saveBtn2">Simpan Absensi</button>
     </div>
     <div class="small" style="margin-top:12px">
       Data Kehadiran disimpan ke database hanya saat klik tombol simpan.
@@ -545,7 +545,7 @@
       </div>
       <div class="class-delete-wrap" id="classDeleteWrap"></div>
       <div class="small" style="margin-top:8px">
-        Data siswa yang disimpan akan langsung digunakan pada menu presensi dan rekap presensi.
+        Data siswa yang disimpan akan langsung digunakan pada menu absensi dan rekap.
       </div>
     </div>
 
@@ -777,7 +777,7 @@ function currentAttendanceCounts() {
 }
 
 function syncSaveButtons() {
-  const label = state.dirtyAttendance ? "Simpan Presensi *" : "Simpan Presensi";
+  const label = state.dirtyAttendance ? "Simpan Absensi *" : "Simpan Absensi";
   el("#saveBtn").textContent = label;
   el("#saveBtn2").textContent = label;
 }
@@ -1528,7 +1528,7 @@ function statusLetterForExcel(status) {
 
 async function confirmDiscardIfDirty() {
   if (!state.dirtyAttendance) return true;
-  return confirm("Ada perubahan Presensi yang belum disimpan. Lanjutkan dan buang perubahan ini?");
+  return confirm("Ada perubahan absensi yang belum disimpan. Lanjutkan dan buang perubahan ini?");
 }
 
 async function changeClass(nextClassCode) {
@@ -1706,7 +1706,7 @@ async function moveRoster() {
 
 async function deleteClassRoster() {
   if (!isSixthClass(state.classCode)) return;
-  const ok = confirm(`Hapus semua siswa dan Presensi untuk ${classLabel(state.classCode)}? Tindakan ini tidak bisa dibatalkan.`);
+  const ok = confirm(`Hapus semua siswa dan absensi untuk ${classLabel(state.classCode)}? Tindakan ini tidak bisa dibatalkan.`);
   if (!ok) return;
   try {
     await apiPost("deleteClassRoster", { classCode: state.classCode });
