@@ -837,7 +837,7 @@
       <button class="sheetbtn blue" id="allI">Semua Izin</button>
       <button class="sheetbtn rose" id="allA">Semua Alpha</button>
       
-      <button class="sheetbtn full blue" id="saveBtn2">Simpan</button>
+      <button class="sheetbtn full blue" id="saveBtn2">Kembali</button>
     </div>
     <div class="small" style="margin-top:12px">
       Data Kehadiran disimpan ke database hanya saat klik tombol simpan.
@@ -1341,7 +1341,7 @@ function currentAttendanceCounts() {
 function syncSaveButtons() {
   const label = state.dirtyAttendance ? "Simpan *" : "Simpan";
   el("#saveBtn").textContent = label;
-  el("#saveBtn2").textContent = label;
+  el("#saveBtn2").textContent = "Kembali";
 }
 
 function canGoNextWeek() {
@@ -2421,7 +2421,9 @@ el("#allI").addEventListener("click", () => bulkSet("I"));
 el("#allA").addEventListener("click", () => bulkSet("A"));
 
 el("#saveBtn").addEventListener("click", saveAttendance);
-el("#saveBtn2").addEventListener("click", saveAttendance);
+el("#saveBtn2").addEventListener("click", () => {
+  el("#overlay").style.display = "none";
+});
 
 
 
