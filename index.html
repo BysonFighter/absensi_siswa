@@ -1278,7 +1278,7 @@ function createReportWorkbook(report) {
   const header1 = ["DAFTAR HADIR SISWA SD YPU"];
   const header2 = [`TAHUN PELAJARAN ${schoolYearLabel()}`];
   const header3 = [`Jenis Rombel: Kelas Utama - Nama Rombel: ${classRoom} - ${semesterLabel()} - Wali Kelas: ${teacherName}`];
-  const row5 = ["NOMOR", "", "NAMA SISWA", "L/P", ...Bulan days.map(() => ""), "Hadir", "Sakit", "Ijin", "Alpha"];
+  const row5 = ["NOMOR", "", "NAMA SISWA", "L/P", ...days.map(() => ""), "Hadir", "Sakit", "Ijin", "Alpha"];
   const row6 = ["", "", "", "", "Tanggal", ...days.map(() => ""), "", "", "", ""];
   const row7 = ["URUT", "NISN", "", "", ...days.map((d) => String(d.day)), "", "", "", ""];
   const data = [header1, header2, header3, [], row5, row6, row7, []];
