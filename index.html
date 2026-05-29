@@ -30,6 +30,14 @@
       var(--bg);
     color:var(--text);
   }
+
+  body.preload {
+    visibility: hidden;
+  }
+  body.preload-ready {
+    visibility: visible;
+  }
+  
   .brand {
     display: flex;
     align-items: center;
@@ -654,7 +662,7 @@
 
 </style>
 </head>
-<body>
+<body class="preload">
 
 <div id="loginPage" class="page active">
   <div class="login-shell">
@@ -2190,13 +2198,14 @@ async function init() {
       await loadRosterEditor();
       showAppPage();
     } else {
-      document.body.classList.remove("app-ready");
       showLoginPage();
     }
   } catch (error) {
     showError(error);
-    document.body.classList.remove("app-ready");
     showLoginPage();
+  } finally {
+    document.body.classList.remove("preload");
+    document.body.classList.add("preload-ready");
   }
 }
 
