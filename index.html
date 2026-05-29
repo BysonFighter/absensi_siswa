@@ -433,9 +433,7 @@
       </div>
     </div>
 
-    <div class="card">
-      <button align="right" class="iconbtn" id="openRoster">👥 Kelola Siswa</button>
-    </div>
+   
   
     <div class="card report-card">
       <div class="report-grid">
@@ -1568,10 +1566,7 @@ async function changeDate(nextDate) {
 function openSheet() { el("#overlay").style.display = "flex"; }
 function closeSheet() { el("#overlay").style.display = "none"; }
 
-function openRoster() {
-  el("#rosterOverlay").style.display = "flex";
-  loadRosterEditor().catch(showError);
-}
+
 function closeRoster() { el("#rosterOverlay").style.display = "none"; }
 
 function rosterRowTemplate(row = {}, idx = 0) {
@@ -1810,7 +1805,7 @@ el("#reportYearSelect").addEventListener("change", () => {
 el("#printReportBtn").addEventListener("click", () => printMonthlyReport().catch(showError));
 el("#exportExcelBtn").addEventListener("click", () => exportMonthlyReportExcel().catch(showError));
 
-el("#openRoster").addEventListener("click", openRoster);
+
 el("#closeRoster").addEventListener("click", closeRoster);
 el("#rosterOverlay").addEventListener("click", (e) => { if (e.target === el("#rosterOverlay")) closeRoster(); });
 
