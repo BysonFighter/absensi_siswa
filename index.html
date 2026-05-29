@@ -714,6 +714,9 @@ async function loadClassData() {
     apiGet({ action: "attendance", classCode: state.classCode, date: state.date }),
   ]);
   state.students = students.students || [];
+  state.students.sort((a, b) =>
+    a.name.localeCompare(b.name, 'id')
+  );
   state.attendance = {};
   (attendance.records || []).forEach(row => {
     state.attendance[String(row.studentId)] = { status: row.status, note: row.note || "" };
