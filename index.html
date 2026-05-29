@@ -976,7 +976,7 @@ function buildReportTable(report) {
       <colgroup>${colgroup}</colgroup>
       <thead>
         <tr>
-          <th colspan="2" class="title-cell nomor-head">NOMOR</th>
+          <th colspan="2" rowspan="2" class="title-cell nomor-head">NOMOR</th>
           <th rowspan="3" class="title-cell name-head">NAMA SISWA</th>
           <th rowspan="3" class="title-cell lp-head">L/P</th>
           <th colspan="${days.length}" class="title-cell month-cell">${escapeHtml(report.monthLabel || "")}</th>
@@ -986,12 +986,13 @@ function buildReportTable(report) {
           <th rowspan="3" class="title-cell count-head">Alpha</th>
         </tr>
         <tr>
-          <th class="title-cell">URUT</th>
-          <th class="title-cell">NISN</th>
+          
           <th colspan="${days.length}" class="title-cell">Tanggal</th>
         </tr>
         <tr>
-          <th colspan="4" class="title-cell" style="border:none;background:transparent;padding:0;height:0"></th>
+          <th class="title-cell">URUT</th>
+          <th class="title-cell">NISN</th>
+          
           ${headerDays}
         </tr>
       </thead>
