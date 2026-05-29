@@ -410,6 +410,35 @@ export async function onRequest(context) {
         return json({ ok: true, saved });
       }
 
+      if (actionPost === "changePin") {
+  const classCode = normalizeClassCode(payload.classCode);
+
+  if (!isValidClassCode(classCode)) {
+    return badRequest("Kode kelas tidak valid.");
+  }
+
+  const row = await env.DB.prepare(
+    "SELECT pin FROM classes WHERE code = ?"
+  ).bind(classCode).first();
+
+  if (!row) {
+    return badRequest("Kelas tidak ditemukan.");
+  }
+
+  if (String(row.pin || "") !== String(payload.oldPin || "")) {
+    return badRequest("PIN lama salah.");
+  }
+
+  await env.DB.prepare(
+    "UPDATE classes SET pin = ? WHERE code = ?"
+  ).bind(
+    String(payload.newPin || ""),
+    classCode
+  ).run();
+
+  return json({ ok: true });
+}
+      
       if (actionPost === "moveRoster" || actionPost === "copyRoster") {
         const fromClassCode = normalizeClassCode(payload.fromClassCode);
         const toClassCode = normalizeClassCode(payload.toClassCode);
