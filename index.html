@@ -1453,10 +1453,10 @@ function createReportWorkbook(report) {
       student.name || "",
       student.gender || "L",
       ...days.map((day) => student.attendance?.[day.date] || ""),
-      student.totals?.H || 0,
-      student.totals?.S || 0,
-      student.totals?.I || 0,
-      student.totals?.A || 0,
+      (student.totals?.H || 0) > 0 ? student.totals.H : "",
+      (student.totals?.S || 0) > 0 ? student.totals.S : "",
+      (student.totals?.I || 0) > 0 ? student.totals.I : "",
+      (student.totals?.A || 0) > 0 ? student.totals.A : "",
     ];
     values.forEach((value, c) => {
       const addr = XLSX.utils.encode_cell({ r: rowNumber, c });
