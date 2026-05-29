@@ -1478,37 +1478,52 @@ function createReportWorkbook(report) {
     }
   }
 
-      // Footer
+        // Footer
+  const signStartCol = Math.max(0, lastCol - 4);
+
+  ws["!merges"].push(
+    { s: { r: footerDateRow, c: signStartCol }, e: { r: footerDateRow, c: lastCol } },
+    { s: { r: footerDateRow + 1, c: signStartCol }, e: { r: footerDateRow + 1, c: lastCol } },
+    { s: { r: footerDateRow + 2, c: signStartCol }, e: { r: footerDateRow + 2, c: lastCol } },
+    { s: { r: footerDateRow + 3, c: signStartCol }, e: { r: footerDateRow + 3, c: lastCol } },
+    { s: { r: footerDateRow + 4, c: signStartCol }, e: { r: footerDateRow + 4, c: lastCol } },
+    { s: { r: footerNameRow, c: signStartCol }, e: { r: footerNameRow, c: lastCol } }
+  );
+
   setCell(
-    XLSX.utils.encode_cell({ r: footerDateRow, c: 0 }),
+    XLSX.utils.encode_cell({ r: footerDateRow, c: signStartCol }),
     `Bandung, ${monthLabel}`,
     {
       font: { italic: true },
-      alignment: { horizontal: "right", vertical: "center", wrapText: false }
+      alignment: { horizontal: "center", vertical: "center", wrapText: false }
     }
   );
 
   setCell(
-    XLSX.utils.encode_cell({ r: footerDateRow + 1, c: 0 }),
+    XLSX.utils.encode_cell({ r: footerDateRow + 1, c: signStartCol }),
     "Kepala Sekolah",
     {
       font: { bold: true },
-      alignment: { horizontal: "right", vertical: "center", wrapText: false }
+      alignment: { horizontal: "center", vertical: "center", wrapText: false }
     }
   );
 
   setCell(
-    XLSX.utils.encode_cell({ r: footerNameRow, c: 0 }),
-    HEADMASTER_NAME,
+    XLSX.utils.encode_cell({ r: footerDateRow + 3, c: signStartCol }),
+    "________________________",
     {
-      font: { bold: true },
-      alignment: { horizontal: "right", vertical: "center", wrapText: false }
+      alignment: { horizontal: "center", vertical: "center", wrapText: false }
     }
   );
 
-  setCell("A30", "TEST TANDA TANGAN", {
-  font: { bold: true }
-});
+  setCell(
+    XLSX.utils.encode_cell({ r: footerNameRow, c: signStartCol }),
+    HEADMASTER_NAME,
+    {
+      font: { bold: true },
+      alignment: { horizontal: "center", vertical: "center", wrapText: false }
+    }
+  );
 
   // Row heights
   ws["!rows"] = [
