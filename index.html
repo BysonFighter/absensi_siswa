@@ -365,6 +365,23 @@
     justify-content:flex-end;
     flex-wrap:wrap;
   }
+
+  @media (max-width: 900px) {
+    .report-grid {
+      grid-template-columns: 1fr;
+    }
+  
+    .report-actions {
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:8px;
+    }
+  
+    .report-actions .btn {
+      width:100%;
+    }
+  }
+  
   .report-hint {
     margin-top:10px;
     font-size:12px;
