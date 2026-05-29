@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Absensi SD YPU 2026</title>
+<title>Sistem Presensi SD YPU</title>
 <style>
   :root {
     --bg:#f4f7fb;
@@ -418,7 +418,7 @@
     <div class="card report-card">
       <div class="report-grid">
         <div class="field">
-          <label for="reportClassSelect">Laporan Absensi Bulanan</label>
+          <label for="reportClassSelect">Rekap Presensi</label>
           <select class="select" id="reportClassSelect"></select>
         </div>
         <div class="field">
@@ -442,8 +442,8 @@
       <div class="brand">
       <img src="logo-sekolah.png" class="school-logo" alt="Logo">
         <div>
-          <h1>Absensi SD YPU 2026</h1>
-          <p class="sub">Pilih kelas, isi status, lalu simpan saat selesai.</p>
+          <h1>SISTEM PRESENSI SD YPU</h1>
+          <p class="sub">Pilih kelas, masuk option, sesuaikan lalu simpan saat selesai.</p>
         </div>
       </div> 
     </div>
@@ -486,7 +486,7 @@
 <div class="bottom">
   <div class="in">
     <button class="btn" id="openSheet2" style="flex:1">Options</button>
-    <button class="btn primary" id="saveBtn" style="flex:1">Simpan Absensi</button>
+    <button class="btn primary" id="saveBtn" style="flex:1">Simpan Presensi</button>
   </div>
 </div>
 
@@ -496,7 +496,7 @@
     <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
       <div>
         <div style="font-size:18px;font-weight:900">Options</div>
-        <div class="small">Aksi cepat untuk absensi hari ini.</div>
+        <div class="small">Aksi cepat untuk Presensi hari ini.</div>
       </div>
       <button class="iconbtn" id="closeSheet">✕</button>
     </div>
@@ -534,7 +534,7 @@
           <select class="select" id="rosterClassSelect"></select>
         </div>
         <div class="field">
-          <label>Siswa pindah ke kelas</label>
+          <label>Pindah ke kelas</label>
           <select class="select" id="copyTargetSelect"></select>
         </div>
         <div class="inline-actions" style="justify-content:flex-end">
@@ -545,7 +545,7 @@
       </div>
       <div class="class-delete-wrap" id="classDeleteWrap"></div>
       <div class="small" style="margin-top:8px">
-        Status kehadiran lama tetap tersimpan karena setiap siswa punya ID unik di database.
+        Data siswa yang disimpan akan langsung digunakan pada menu presensi dan rekap presensi.
       </div>
     </div>
 
