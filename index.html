@@ -2409,9 +2409,18 @@ el("#nextDay").addEventListener("click", async () => {
 });
 
 el("#q").addEventListener("input", renderList);
-el("#openSheet2").addEventListener("click", openSheet);
-el("#closeSheet").addEventListener("click", closeSheet);
-el("#overlay").addEventListener("click", (e) => { if (e.target === el("#overlay")) closeSheet(); });
+const openSheetBtn = el("#openSheet2");
+if (openSheetBtn) openSheetBtn.addEventListener("click", openSheet);
+
+const closeSheetBtn = el("#closeSheet");
+if (closeSheetBtn) closeSheetBtn.addEventListener("click", closeSheet);
+
+const overlayEl = el("#overlay");
+if (overlayEl) {
+  overlayEl.addEventListener("click", (e) => {
+    if (e.target === overlayEl) closeSheet();
+  });
+}
 
 el("#allH").addEventListener("click", () => bulkSet("H"));
 el("#allS").addEventListener("click", () => bulkSet("S"));
