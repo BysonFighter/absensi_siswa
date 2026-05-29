@@ -1351,6 +1351,13 @@ function createReportWorkbook(report) {
   setCell("A2", header2[0], styleTitle);
   setCell("A3", header3[0], styleTitle);
 
+  setCell("AF12", "Bandung, " + reportState.month + " " + reportState.year, {});
+  setCell("AF17", "Isah Aisyah, A.Ma.Pd.", {
+    font: {
+        bold: true
+    }
+  });
+  
   // Header rows
   setCell("A5", row5[0], styleHeader);
   setCell("A7", "URUT", styleHeader);
