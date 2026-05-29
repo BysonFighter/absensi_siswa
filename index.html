@@ -1565,6 +1565,11 @@ async function loadRosterEditor() {
   el("#copyTargetSelect").value = target;
 
   const data = await apiGet({ action: "students", classCode: state.classCode, includeInactive: "1" });
+
+  const sortedStudents = (data.students || []).sort((a, b) =>
+    (a.name || "").localeCompare(b.name || "", "id")
+  );
+  
   state.rosterRows = (data.students || []).map((row, idx) => ({
     id: row.id,
     nisn: row.nisn || "",
