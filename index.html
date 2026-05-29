@@ -1011,8 +1011,8 @@ function buildReportTable(report) {
   );
   
   const colWeights = [
-    3.0, 8.6, 16.5, 3.5,
-    ...days.map(() => 0.80),
+    3.0, 7.6, 12.5, 3.5,
+    ...days.map(() => 1.0),
     3.6, 3.6, 3.6, 3.6,
   ];
   const totalWeight = colWeights.reduce((sum, value) => sum + value, 0);
