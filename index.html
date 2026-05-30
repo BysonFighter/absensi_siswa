@@ -916,6 +916,9 @@
           <h1>SD YPU</h1>
           <p class="sub">Sistem Presensi Siswa</p>
         </div>
+        <div class="school-doodle">
+            📚 ✏️ 🎒 📐
+        </div>
       </div>
       
     </div>
@@ -1866,6 +1869,28 @@ function buildReportHtml(report) {
     text-align: center;
     margin-bottom: 8px;
   }
+
+  .header-card{
+    position:relative;
+    overflow:hidden;
+  }
+
+  .school-doodle{
+    position:absolute;
+    right:30px;
+    top:50%;
+    transform:translateY(-50%);
+
+    font-size:42px;
+    opacity:.06;
+
+    display:flex;
+    gap:18px;
+
+    pointer-events:none;
+    user-select:none;
+  }
+  
   .header .h1 {
     font-size: 16px;
     font-weight: 700;
