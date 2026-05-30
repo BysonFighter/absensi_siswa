@@ -195,23 +195,8 @@
   overflow: hidden;
 }
 
-.school-doodle{
-  position: absolute;
-  right: 18px;
-  top: 50%;
-  transform: translateY(-50%);
-  display: flex;
-  gap: 16px;
-  font-size: 34px;
-  color: rgba(255, 160, 80, 0.18);
-  pointer-events: none;
-  user-select: none;
-  z-index: 0;
-}
 
-.school-doodle i{
-  filter: blur(0.2px);
-}
+
 
 .brand > *:not(.school-doodle){
   position: relative;
@@ -885,6 +870,62 @@
     margin-top:2px;
   }
 
+.brand{
+    position:relative;
+    display:flex;
+    align-items:center;
+    gap:14px;
+    overflow:hidden;
+    padding:8px 12px;
+}
+
+.brand::before{
+    content:"";
+    position:absolute;
+    top:-80px;
+    right:-120px;
+
+    width:420px;
+    height:220px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(255,204,51,.18) 0%,
+        rgba(255,204,51,.08) 35%,
+        transparent 70%
+      );
+
+    filter:blur(30px);
+    pointer-events:none;
+}
+
+.brand::after{
+    content:"";
+    position:absolute;
+    bottom:-90px;
+    right:40px;
+
+    width:320px;
+    height:180px;
+
+    background:
+      radial-gradient(
+        circle,
+        rgba(255,122,0,.16) 0%,
+        rgba(255,122,0,.08) 40%,
+        transparent 70%
+      );
+
+    filter:blur(35px);
+    pointer-events:none;
+}
+
+.brand > *{
+    position:relative;
+    z-index:1;
+}
+  
 </style>
 </head>
 <body class="preload">
@@ -945,12 +986,7 @@
           <h1>SD YPU</h1>
           <p class="sub">Sistem Presensi Siswa</p>
         </div>
-        <div class="school-doodle">
-            <i class="fa-solid fa-book"></i>
-            <i class="fa-solid fa-pencil"></i>
-            <i class="fa-solid fa-school"></i>
-            <i class="fa-solid fa-graduation-cap"></i>
-        </div>
+        
       </div>
       
     </div>
@@ -1907,21 +1943,7 @@ function buildReportHtml(report) {
     overflow:hidden;
   }
 
-  .school-doodle{
-    position:absolute;
-    right:30px;
-    top:50%;
-    transform:translateY(-50%);
-
-    font-size:42px;
-    opacity:.06;
-
-    display:flex;
-    gap:18px;
-
-    pointer-events:none;
-    user-select:none;
-  }
+  
   
   .header .h1 {
     font-size: 16px;
