@@ -188,6 +188,31 @@
     font-weight:700;
     color:var(--slate);
   }
+
+  .meta-info{
+    display:flex;
+    gap:40px;
+    margin-top:12px;
+  }
+  
+  .meta-label{
+    display:flex;
+    flex-direction:column;
+    gap:2px;
+  }
+  
+  .meta-title{
+    font-size:12px;
+    font-weight:600;
+    color:#94a3b8;
+  }
+  
+  .meta-label span:last-child{
+    font-size:15px;
+    font-weight:700;
+    color:#64748b;
+  }
+  
   .week { display:grid; grid-template-columns:repeat(7,1fr); gap:8px; margin-top:12px; }
   .day {
     border:1px solid var(--line);
@@ -871,13 +896,19 @@
       
     </div>
     <div class="brand-meta">
-      <div class="meta">
-        <div class="pill" id="classCount">12 kelas</div>
-        <div class="pill" id="studentCount">0 siswa aktif</div>
-          
+      <div class="meta-info">
+        <div class="meta-label">
+          <span class="meta-title">Kelas</span>
+          <span id="classCount">1A</span>
+        </div>
+      
+        <div class="meta-label">
+          <span class="meta-title">Jumlah Siswa</span>
+          <span id="studentCount">0</span>
         </div>
       </div>
     </div>
+  </div>
 
   
   <div class="card">
@@ -1450,7 +1481,7 @@ async function loadClassData() {
     state.attendance = {};
   }
   state.dirtyAttendance = false;
-  el("#studentCount").textContent = `Jumlah siswa : ${state.students.length}`;
+  el("#studentCount").textContent = state.students.length;
   render();
 }
 
