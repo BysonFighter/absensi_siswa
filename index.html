@@ -807,6 +807,21 @@
 
   #loginPage .forgot:hover { text-decoration:underline; }
 
+.nav-wrap{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:4px;
+}
+
+.nav-label{
+  font-size:10px;
+  font-weight:600;
+  color:#94a3b8;
+  line-height:1;
+  min-height:12px;
+}
+  
 
 #loginPage form {
     display:flex;
@@ -913,8 +928,13 @@
         <select class="select hidden-select" id="classSelect"></select>
       </div>
       <div class="date-row">
-        <button class="iconbtn" id="prevDay">←</button>
+        <div class="nav-wrap">
+          <div class="nav-label" id="classLabel"></div>
+          <button class="iconbtn" id="prevDay">←</button>
+        </div>
+      
         <div class="datebox" id="dateText"></div>
+      
         <button class="iconbtn" id="nextDay">→</button>
       </div>
     </div>
@@ -935,9 +955,7 @@
 
 <div class="bottom">
   <div class="in">
-    <div class="meta-info bottom-meta">
-      
-    </div>
+    
 
     <button class="btn" id="openSheet2" style="flex:1">Options</button>
     <button class="btn primary" id="saveBtn" style="flex:1">Simpan</button>
@@ -1451,7 +1469,7 @@ async function loadClasses() {
   syncClassSelectors();
   syncReportSelectors();
   syncLoginSelectors();
-  el("#classCount").textContent = classLabel(state.classCode);
+  el("#classLabel").textContent = classLabel(state.classCode);
   el("#classSelect").value = state.classCode;
   el("#rosterClassSelect").value = state.classCode;
   
@@ -1480,7 +1498,7 @@ async function loadClassData() {
     state.attendance = {};
   }
   state.dirtyAttendance = false;
-  el("#studentCount").textContent = state.students.length;
+  el("#studentCount").textContent = `Jumlah siswa : ${state.students.length}`;
   render();
 }
 
