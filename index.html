@@ -879,47 +879,54 @@
     padding:8px 12px;
 }
 
-.brand::before{
-    content:"";
-    position:absolute;
-    top:-80px;
-    right:-120px;
 
-    width:420px;
-    height:220px;
-
-    background:
-      radial-gradient(
-        circle,
-        rgba(255,204,51,.18) 0%,
-        rgba(255,204,51,.08) 35%,
-        transparent 70%
-      );
-
-    filter:blur(30px);
-    pointer-events:none;
+.header-card{
+  position: relative;
+  overflow: hidden;
 }
 
-.brand::after{
-    content:"";
-    position:absolute;
-    bottom:-90px;
-    right:40px;
-
-    width:320px;
-    height:180px;
-
-    background:
-      radial-gradient(
-        circle,
-        rgba(255,122,0,.16) 0%,
-        rgba(255,122,0,.08) 40%,
-        transparent 70%
-      );
-
-    filter:blur(35px);
-    pointer-events:none;
+.header-card::before{
+  content:"";
+  position:absolute;
+  inset:-35% -10% -35% 45%;
+  background:
+    radial-gradient(circle at 75% 30%, rgba(255,204,51,.22) 0%, rgba(255,204,51,.10) 18%, transparent 45%),
+    radial-gradient(circle at 88% 65%, rgba(255,122,0,.16) 0%, rgba(255,122,0,.07) 16%, transparent 42%),
+    radial-gradient(circle at 95% 40%, rgba(255,255,255,.30) 0%, transparent 30%);
+  filter: blur(30px);
+  opacity: .9;
+  pointer-events: none;
+  z-index: 0;
 }
+
+.header-card::after{
+  content:"";
+  position:absolute;
+  inset:0;
+  background: linear-gradient(
+    90deg,
+    rgba(255,255,255,.45) 0%,
+    rgba(255,255,255,.15) 55%,
+    rgba(255,255,255,0) 100%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.header-card .top,
+.header-card .brand{
+  position: relative;
+  z-index: 1;
+}
+
+.brand{
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  overflow: visible;
+}
+
 
 .brand > *{
     position:relative;
@@ -978,17 +985,15 @@
   
     
 
-  <div class="card">
+  <div class="card header-card">
     <div class="top">
       <div class="brand">
-      <img src="logo-sekolah.png" class="school-logo" alt="Logo">
+        <img src="logo-sekolah.png" class="school-logo" alt="Logo">
         <div>
           <h1>SD YPU</h1>
           <p class="sub">Sistem Presensi Siswa</p>
         </div>
-        
       </div>
-      
     </div>
   </div>
 
