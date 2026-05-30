@@ -885,18 +885,9 @@
   
   <div class="card">
     <div class="toolbar">
-      <div class="field">
-        <div class="meta-label">
-          <span class="meta-title">Kelas</span>
-          <span id="classCount">1A</span>
-        </div>
-      
-        <select class="select hidden-select" id="classSelect"></select>
-      </div>
+      <select class="select hidden-select" id="classSelect"></select>
       <div class="date-row">
-        <div class="nav-wrap">
-          <button class="iconbtn" id="prevDay">←</button>
-        </div>
+        <button class="iconbtn" id="prevDay">←</button>
       
         <div class="datebox" id="dateText"></div>
       
@@ -1235,10 +1226,7 @@ function getLoginPinForClass(classCode) {
   return apiPin || localPin || "123456";
 }
 
-function updateClassLabel() {
-  const labelEl = el("#classLabel");
-  if (labelEl) labelEl.textContent = classLabel(state.classCode);
-}
+
 
 function applyAuthClass(classCode) {
   state.classCode = classCode;
@@ -1247,12 +1235,8 @@ function applyAuthClass(classCode) {
   localStorage.setItem("absensi-report-class", reportState.classCode);
   syncClassSelectors();
   syncReportSelectors();
-  updateClassLabel();
 
-  const classCountEl = el("#classCount");
-  if (classCountEl) {
-    classCountEl.textContent = classLabel(classCode);
-  }
+  
 }
 
 function canUseSavedAuth() {
@@ -1396,7 +1380,7 @@ function syncClassSelectors() {
   buildClassOptions(el("#rosterClassSelect"), state.classCode);
   buildClassOptions(el("#reportClassSelect"), reportState.classCode);
   buildClassOptions(el("#loginClassSelect"), state.classCode);
-  updateClassLabel();
+ 
   el("#copyTargetSelect").innerHTML = state.classes.map(item => `
     <option value="${item.code}" ${item.code !== state.classCode ? "" : "disabled"}>${item.name}</option>
   `).join("");
