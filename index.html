@@ -536,6 +536,21 @@
     padding:18px;
   }
 
+  .rownum {
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
+  border-radius: 999px;
+  border: 1px solid var(--line);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  color: var(--text);
+  flex: 0 0 auto;
+}
+  
   #loginPage .login-shell {
     position:relative;
     width:100%;
@@ -1398,14 +1413,17 @@ function renderList() {
   });
   const rec = state.attendance;
 
-  el("#list").innerHTML = list.length ? list.map(student => {
+  el("#list").innerHTML = list.length ? list.map((student, idx) => {
     const current = rec[String(student.id)]?.status || "";
     return `
       <div class="student">
         <div class="head">
-          <div>
-            <div class="nisn">NISN ${escapeHtml(student.nisn || "-")}</div>
-            <div class="name">${escapeHtml(student.name || "")}</div>
+          <div style="display:flex; gap:10px; align-items:flex-start;">
+            <div class="rownum">${idx + 1}</div>
+            <div>
+              <div class="nisn">NISN ${escapeHtml(student.nisn || "-")}</div>
+              <div class="name">${escapeHtml(student.name || "")}</div>
+            </div>
           </div>
           <div class="badge">${current || "Belum"}</div>
         </div>
