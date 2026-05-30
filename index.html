@@ -255,18 +255,32 @@
 
     flex-shrink:0;
     opacity:.7;
+
+    width:24px !important;
+    height:24px !important;
+    min-width:24px !important;
+    min-height:24px !important;
+    max-width:24px !important;
+    max-height:24px !important;
+
+    flex:0 0 24px !important;
+    padding:0 !important;
+    overflow:hidden;
 }
 
   .badge.empty{
-    width:24px;
-    height:24px;
-    min-width:24px;
-    min-height:24px;
-
     background:#fff;
-    border:1px solid #e2e8f0;
     color:transparent;
-    opacity:.45;
+    border:1px solid #e2e8f0;
+
+    width:24px !important;
+    height:24px !important;
+    min-width:24px !important;
+    min-height:24px !important;
+    max-width:24px !important;
+    max-height:24px !important;
+
+    flex:0 0 24px !important;
 }
   
   .badge.s-H{
@@ -1503,7 +1517,7 @@ function renderList() {
             </div>
           </div>
           <div class="badge ${current ? "s-"+current : "empty"}">
-            ${current || ""}
+              ${current ? current : "&nbsp;"}
           </div>
         </div>
         <div class="choices">
