@@ -911,17 +911,28 @@
   }
 
 .header-card::after{
-  content:"";
-  position:absolute;
-  inset:0;
-  background: linear-gradient(
-    90deg,
-    rgba(255,255,255,.45) 0%,
-    rgba(255,255,255,.15) 55%,
-    rgba(255,255,255,0) 100%
-  );
-  pointer-events: none;
-  z-index: 0;
+    content:"";
+    position:absolute;
+
+    top:20px;
+    right:80px;
+
+    width:250px;
+    height:80px;
+
+    background:
+      linear-gradient(
+        110deg,
+        transparent,
+        rgba(255,255,255,.45),
+        transparent
+      );
+
+    filter:blur(12px);
+
+    transform:rotate(-15deg);
+
+    pointer-events:none;
 }
 
 .header-card .top,
