@@ -925,7 +925,21 @@
   #loginPage .forgot:hover { text-decoration:underline; }
 
 
+#holidayPage .holiday-list{
+  margin-top:12px;
+  display:grid;
+  gap:10px;
+  max-height:58vh;
+  overflow:auto;
+  padding-right:4px;
+}
 
+#holidayPage .holiday-item{
+  background:#f8fafc;
+  border:1px solid var(--line);
+  border-radius:20px;
+  padding:12px;
+}
   
 
 #loginPage form {
@@ -1259,6 +1273,66 @@
 </div>
 </div>
 
+<div id="holidayPage" class="page">
+  <div class="wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
+      <div>
+        <h1 style="font-size:30px;">Kelola Hari Libur</h1>
+        <p class="sub">Tambah, lihat, dan hapus libur yang tersimpan.</p>
+      </div>
+      <button class="iconbtn" id="backHolidayBtn">
+        ✕
+      </button>
+    </div>
+
+    <div class="card">
+      <div class="report-card" style="margin-bottom:0;">
+        <div class="field">
+          <label for="holidayDate">Tanggal Libur</label>
+          <input class="input" id="holidayDate" type="date">
+        </div>
+
+        <div class="field" style="margin-top:12px;">
+          <label for="holidayNote">Keterangan</label>
+          <input class="input" id="holidayNote" type="text" placeholder="Contoh: Idul Adha">
+        </div>
+
+        <div style="margin-top:12px;">
+          <button class="btn primary" id="saveHolidayBtn" style="width:100%;">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Simpan Libur</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="report-card" style="margin-bottom:0;">
+        <div class="report-grid">
+          <div class="field">
+            <label for="holidayMonthSelect">Bulan</label>
+            <select class="select" id="holidayMonthSelect"></select>
+          </div>
+
+          <div class="field">
+            <label for="holidayYearSelect">Tahun</label>
+            <select class="select" id="holidayYearSelect"></select>
+          </div>
+
+          <div class="report-actions">
+            <button class="btn secondary" id="showHolidayBtn">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <span>Tampilkan</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div class="holiday-list" id="holidayList"></div>
+    </div>
+  </div>
+</div>
+  
 <div class="bottom">
   <div class="in">
     
@@ -1396,36 +1470,7 @@
   </div>
 </div>
 
-<div class="overlay" id="holidayOverlay" style="display:none;">
-  <div class="sheet pin-sheet">
-    <div class="sheetbar"></div>
 
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-      <div>
-        <div style="font-size:18px;font-weight:900">Kelola Hari Libur</div>
-        <div class="small">Pilih tanggal libur lalu simpan ke database.</div>
-      </div>
-      <button class="iconbtn" id="closeHolidaySheet">✕</button>
-    </div>
-
-    <div style="margin-top:14px;display:grid;gap:12px;">
-      <div class="field">
-        <label for="holidayDate">Tanggal Libur</label>
-        <input class="input" id="holidayDate" type="date">
-      </div>
-
-      <div class="field">
-        <label for="holidayNote">Keterangan</label>
-        <input class="input" id="holidayNote" type="text" placeholder="Contoh: Libur Nasional">
-      </div>
-
-      <div class="sheetgrid">
-        <button class="sheetbtn cream" id="cancelHolidayBtn">Batal</button>
-        <button class="sheetbtn rose" id="saveHolidayBtn">Simpan Libur</button>
-      </div>
-    </div>
-  </div>
-</div>
   
 <div class="overlay" id="rosterOverlay">
   
@@ -1471,6 +1516,13 @@
 <div class="toast" id="toast"></div>
 
 <script>
+
+const holidayState = {
+  month: Number(localStorage.getItem("absensi-holiday-month") || (new Date().getMonth() + 1)),
+  year: Number(localStorage.getItem("absensi-holiday-year") || new Date().getFullYear()),
+  items: []
+};
+  
 const STATUS = [
   { k: "H", l: "Hadir", c: "H" },
   { k: "S", l: "Sakit", c: "S" },
@@ -1554,6 +1606,31 @@ function isAuthenticated() {
   return Boolean(getAuthClassCode());
 }
 
+function formatHolidayDate(iso) {
+  return new Intl.DateTimeFormat("id-ID", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric"
+  }).format(parseLocalDate(iso));
+}
+
+function openHolidayPage() {
+  el("#appPage").classList.remove("active");
+  el("#holidayPage").classList.add("active");
+  document.body.classList.remove("app-ready");
+  document.title = "SD YPU - Kelola Hari Libur";
+
+  buildMonthOptions(el("#holidayMonthSelect"), holidayState.month);
+  buildYearOptions(el("#holidayYearSelect"), holidayState.year);
+
+  loadHolidayList();
+}
+
+function closeHolidayPage() {
+  el("#holidayPage").classList.remove("active");
+  showAppPage();
+}
+  
 function setAuthClassCode(classCode, remember) {
   if (remember) {
     localStorage.setItem(AUTH_SESSION_KEY, classCode);
@@ -1589,16 +1666,7 @@ function openChangePinSheet() {
   setTimeout(() => el("#oldPin")?.focus(), 50);
 }
 
-function openHolidaySheet() {
-  el("#holidayOverlay").style.display = "flex";
-  el("#holidayDate").value = state.date;
-  el("#holidayNote").value = "";
-  setTimeout(() => el("#holidayDate")?.focus(), 50);
-}
 
-function closeHolidaySheet() {
-  el("#holidayOverlay").style.display = "none";
-}
 
 async function saveHoliday() {
   const date = el("#holidayDate").value;
@@ -1610,15 +1678,75 @@ async function saveHoliday() {
   }
 
   await apiPost("saveHoliday", {
-    classCode: state.classCode,
+    classCode: state.classCode, // identitas penginput
     date,
     note
   });
 
-  setToast("Hari libur tersimpan");
-  closeHolidaySheet();
-}  
+  setToast("Data Libur tersimpan!");
+  el("#holidayDate").value = "";
+  el("#holidayNote").value = "";
+  await loadHolidayList();
+}
 
+async function loadHolidayList() {
+  const month = Number(el("#holidayMonthSelect").value || holidayState.month);
+  const year = Number(el("#holidayYearSelect").value || holidayState.year);
+
+  holidayState.month = month;
+  holidayState.year = year;
+
+  localStorage.setItem("absensi-holiday-month", String(month));
+  localStorage.setItem("absensi-holiday-year", String(year));
+
+  const data = await apiGet({
+    action: "holidayList",
+    month,
+    year
+  });
+
+  holidayState.items = data.holidays || [];
+  renderHolidayList();
+}
+
+function renderHolidayList() {
+  const box = el("#holidayList");
+  const items = holidayState.items || [];
+
+  if (!items.length) {
+    box.innerHTML = `<div class="empty">Belum ada libur di bulan ini.</div>`;
+    return;
+  }
+
+  box.innerHTML = items.map(item => `
+    <div class="holiday-item">
+      <div class="head">
+        <div>
+          <div class="nisn">${escapeHtml(formatHolidayDate(item.date))}</div>
+          <div class="name">${escapeHtml(item.note || "-")}</div>
+        </div>
+        <div class="badge">${escapeHtml(item.classCode || "")}</div>
+      </div>
+
+      <div class="inline-actions" style="justify-content:flex-end;margin-top:10px;">
+        <button class="btn danger" data-del="${item.date}">
+          <i class="fa-solid fa-trash"></i>
+          <span>Hapus</span>
+        </button>
+      </div>
+    </div>
+  `).join("");
+
+  box.querySelectorAll("[data-del]").forEach(btn => {
+    btn.addEventListener("click", async () => {
+      if (!confirm("Hapus hari libur ini?")) return;
+      await apiPost("deleteHoliday", { date: btn.dataset.del });
+      setToast("Data libur dihapus");
+      await loadHolidayList();
+    });
+  });
+}
+  
 function closePinSheet() {
   el("#pinOverlay").style.display = "none";
 }
@@ -2314,7 +2442,11 @@ function buildReportHtml(report) {
     overflow:hidden;
   }
 
-  
+  .report-table td.holiday-cell{
+    background:#ffb3b3 !important;
+    -webkit-print-color-adjust:exact;
+    print-color-adjust:exact;
+  }
   
   .header .h1 {
     font-size: 16px;
@@ -3057,10 +3189,10 @@ el("#pinOverlay").addEventListener("click", (e) => {
   if (e.target === el("#pinOverlay")) closePinSheet();
 });
 el("#savePinBtn").addEventListener("click", () => changePin().catch(showError));
-el("#holidayBtn").addEventListener("click", openHolidaySheet);
-el("#closeHolidaySheet").addEventListener("click", closeHolidaySheet);
-el("#cancelHolidayBtn").addEventListener("click", closeHolidaySheet);
-el("#saveHolidayBtn").addEventListener("click", saveHoliday);  
+el("#holidayBtn").addEventListener("click", openHolidayPage);
+el("#backHolidayBtn").addEventListener("click", closeHolidayPage);
+el("#showHolidayBtn").addEventListener("click", loadHolidayList);
+el("#saveHolidayBtn").addEventListener("click", saveHoliday);
 el("#rosterClassSelect").addEventListener("change", async () => {
   if (!(await confirmDiscardIfDirty())) {
     el("#rosterClassSelect").value = state.classCode;
