@@ -2515,7 +2515,7 @@ async function saveAttendance() {
 
     await apiPost("saveAttendance", {
       classCode: state.classCode,
-      date: state.date,
+      date: state.date || state.viewDate || todayIso(),
       records,
       replace: true,
     });
@@ -3525,16 +3525,19 @@ el("#rosterClassSelect").addEventListener("change", async () => {
 });
 
 el("#prevDay").addEventListener("click", async () => {
-  const d = parseLocalDate(state.date);
+  const d = parseLocalDate(state.date || todayIso());
   d.setDate(d.getDate() - 7);
   state.date = todayIso(d);
+  state.viewDate = state.date;
   await loadClassData();
 });
 
 el("#nextDay").addEventListener("click", async () => {
-  const d = parseLocalDate(state.date);
+  if (!canGoNextWeek()) return;
+  const d = parseLocalDate(state.date || todayIso());
   d.setDate(d.getDate() + 7);
   state.date = todayIso(d);
+  state.viewDate = state.date;
   await loadClassData();
 });
 
