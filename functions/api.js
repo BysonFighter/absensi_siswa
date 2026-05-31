@@ -479,7 +479,13 @@ export async function onRequest(context) {
         const date = String(payload.date || "").trim();
         if (!isValidClassCode(classCode)) return badRequest("Kode kelas tidak valid.");
         if (!date) return badRequest("Tanggal wajib diisi.");
+      
         const saved = await upsertAttendance(env, classCode, date, payload.records || [], Boolean(payload.replace));
+      
+        if (saved <= 0) {
+          return badRequest("Tidak ada data absensi yang tersimpan.");
+        }
+      
         return json({ ok: true, saved });
       }
 
