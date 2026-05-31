@@ -1134,6 +1134,25 @@
     pointer-events: none;
   }
 
+.holiday-bottom{
+  display:none;
+  position:fixed;
+  left:0;
+  right:0;
+  bottom:0;
+  z-index:9999;
+
+  background:rgba(255,255,255,.75);
+  backdrop-filter:blur(18px);
+  -webkit-backdrop-filter:blur(18px);
+
+  border-top:1px solid rgba(255,255,255,.25);
+}
+
+#holidayPage.active ~ .holiday-bottom{
+  display:block;
+}
+  
 .header-card::after{
     content:"";
     position:absolute;
@@ -1330,21 +1349,7 @@
         </div>
       </div>
 
-      <div class="holiday-bottom">
-        <div class="in">
       
-          <button class="btn" id="backHolidayBtn2" style="flex:1">
-            <i class="fa-solid fa-arrow-left"></i>
-            <span>Kembali</span>
-          </button>
-      
-          <button class="btn primary" id="saveHolidayBtn" style="flex:1">
-            <i class="fa-solid fa-floppy-disk"></i>
-            <span>Simpan Libur</span>
-          </button>
-      
-        </div>
-      </div>
       
     </div>
 
@@ -1555,6 +1560,22 @@
   </div>
 </div>
 
+
+ <div class="holiday-bottom">
+        <div class="in">
+      
+          <button class="btn" id="backHolidayBtn2" style="flex:1">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Kembali</span>
+          </button>
+      
+          <button class="btn primary" id="saveHolidayBtn" style="flex:1">
+            <i class="fa-solid fa-floppy-disk"></i>
+            <span>Simpan Libur</span>
+          </button>
+      
+        </div>
+      </div> 
 <div class="toast" id="toast"></div>
 
 <script>
