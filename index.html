@@ -1437,6 +1437,27 @@ function todayIso(d = new Date()) {
   return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
 }
 
+function isSchoolDay(dateObj) {
+  const day = dateObj.getDay(); // 0 = Minggu, 6 = Sabtu
+  return day >= 1 && day <= 5; // Senin s/d Jumat
+}
+
+function moveToSchoolDay(dateObj, step) {
+  const d = new Date(dateObj);
+  do {
+    d.setDate(d.getDate() + step);
+  } while (!isSchoolDay(d));
+  return d;
+}
+
+function normalizeToSchoolDay(iso) {
+  const d = parseLocalDate(iso);
+  while (!isSchoolDay(d)) {
+    d.setDate(d.getDate() - 1); // kalau weekend, mundur ke Jumat
+  }
+  return todayIso(d);
+}
+
 function parseLocalDate(iso) {
   const [year, month, day] = String(iso || "").split("-").map(Number);
   return new Date(year, (month || 1) - 1, day || 1);
@@ -1646,14 +1667,15 @@ function syncWeekNavButtons() {
 function renderTop() {
   const dateObj = parseLocalDate(state.date);
   el("#dateText").innerHTML = `<span>📅</span><span>${prettyDate(dateObj)}</span>`;
-  const wk = startWeek(dateObj);
-  const today = todayIso();
-  el("#week").innerHTML = Array.from({ length: 7 }, (_, i) => {
-    const d = new Date(wk);
-    d.setDate(d.getDate() + i);
+
+  const monday = startWeek(dateObj);
+
+  el("#week").innerHTML = Array.from({ length: 5 }, (_, i) => {
+    const d = new Date(monday);
+    d.setDate(d.getDate() + i); // Senin - Jumat saja
     const iso = todayIso(d);
     const active = iso === state.date ? "active" : "";
-    const disabled = iso > today ? "disabled" : "";
+    const disabled = iso > todayIso() ? "disabled" : "";
     return `<button class="day ${active}" data-date="${iso}" ${disabled}><div>${prettyShort(d).split(",")[0]}</div><div class="n">${d.getDate()}</div></button>`;
   }).join("");
 
@@ -2667,6 +2689,7 @@ function showError(error) {
 
 async function init() {
   try {
+    state.date = normalizeToSchoolDay(state.date);
     await loadClasses();
 
     const savedAuthClass = getAuthClassCode();
@@ -2714,15 +2737,15 @@ el("#rosterClassSelect").addEventListener("change", async () => {
 
 el("#prevDay").addEventListener("click", async () => {
   const d = parseLocalDate(state.date);
-  d.setDate(d.getDate() - 7);
-  await changeDate(todayIso(d));
+  const prevSchoolDay = moveToSchoolDay(d, -1);
+  await changeDate(todayIso(prevSchoolDay));
 });
 
 el("#nextDay").addEventListener("click", async () => {
-  if (!canGoNextWeek()) return;
   const d = parseLocalDate(state.date);
-  d.setDate(d.getDate() + 7);
-  await changeDate(todayIso(d));
+  const nextSchoolDay = moveToSchoolDay(d, 1);
+  if (todayIso(nextSchoolDay) > todayIso()) return;
+  await changeDate(todayIso(nextSchoolDay));
 });
 
 el("#q").addEventListener("input", renderList);
