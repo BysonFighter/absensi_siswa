@@ -322,16 +322,9 @@
     box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
   }
   
-  .day.future-day:disabled{
-  background:rgba(255,241,242,.28);
-  color:#d97790;
-  opacity:.45;
-  backdrop-filter:blur(10px);
-  -webkit-backdrop-filter:blur(10px);
-  filter:saturate(.9);
-}
+  
 
-.day.holiday-day:disabled{
+.day.holiday-day{
   background:rgba(255,241,242,.82);
   color:#be123c;
   opacity:.92;
@@ -342,14 +335,16 @@
     inset 0 1px 0 rgba(255,255,255,.45);
 }
 
+.day.holiday-day .n{
+  color:#be123c;
+}
+
 .day.future-day:disabled .n,
 .day.holiday-day:disabled .n{
   color:inherit;
 }
   
-  .day.future-day:disabled .n{
-    color:#d97790;
-  }
+  
   
   .day.holiday-day:disabled .n{
     color:#be123c;
@@ -2398,11 +2393,10 @@ function syncWeekNavButtons() {
 }
 
 function renderTop() {
-  const dateObj = parseLocalDate(state.viewDate || todayIso());
+  const dateObj = parseLocalDate(state.date);
+  const isHolidaySelected = state.holidayDates?.has(state.date);
 
-  el("#dateText").innerHTML = state.dayPicked
-  ? `<span>📅</span><span>${prettyDate(dateObj)}</span>`
-  : "";
+  el("#dateText").innerHTML = `<span>📅</span><span>${prettyDate(dateObj)}</span>`;
 
   const monday = startWeek(dateObj);
 
@@ -2411,18 +2405,13 @@ function renderTop() {
     d.setDate(d.getDate() + i);
     const iso = todayIso(d);
 
-    const active = state.dayPicked && iso === state.date ? "active" : "";
-    const isFuture = iso > todayIso();
-    const isHoliday = state.holidayDates?.has(iso);
-
-    const disabled = (isFuture || isHoliday) ? "disabled" : "";
-    const dayClass = isHoliday ? "holiday-day" : (isFuture ? "future-day" : "");
+    const active = iso === state.date ? "active" : "";
+    const dayClass = state.holidayDates?.has(iso) ? "holiday-day" : "";
 
     return `
       <button
         class="day ${active} ${dayClass}"
         data-date="${iso}"
-        ${disabled}
       >
         <div>${prettyShort(d).split(",")[0]}</div>
         <div class="n">${d.getDate()}</div>
@@ -2432,11 +2421,8 @@ function renderTop() {
 
   el("#week").querySelectorAll("[data-date]").forEach(btn => {
     btn.addEventListener("click", async () => {
-      if (btn.disabled) return;
-      state.dayPicked = true;
       state.date = btn.dataset.date;
-      state.viewDate = btn.dataset.date;
-      await changeDate(btn.dataset.date);
+      await loadClassData();
     });
   });
 
@@ -2461,7 +2447,8 @@ function renderList() {
   const rec = state.attendance;
 
   el("#list").innerHTML = list.length ? list.map((student, idx) => {
-    const current = rec[String(student.id)]?.status || "";
+    const isHolidaySelected = state.holidayDates?.has(state.date);
+    const current = isHolidaySelected ? "" : (rec[String(student.id)]?.status || "");
     return `
       <div class="student">
         <div class="head">
@@ -2478,7 +2465,7 @@ function renderList() {
         </div>
         <div class="choices">
           ${STATUS.map(st => `
-            <button class="choice ${current === st.k ? "active " + st.c : ""}" data-id="${student.id}" data-st="${st.k}">
+            <button class="choice ${current === st.k ? "active " + st.c : ""}" data-id="${student.id}" data-st="${st.k}" ${isHolidaySelected ? "disabled" : ""}>
               ${st.l}
             </button>
           `).join("")}
@@ -2499,6 +2486,11 @@ function render() {
 }
 
 function setAttendanceLocal(studentId, status) {
+  if (state.holidayDates?.has(state.date)) {
+    setToast("Hari ini sedang libur!");
+    return;
+  }
+
   const student = state.students.find(s => String(s.id) === String(studentId));
   if (!student) return;
   state.attendance[String(studentId)] = { status, note: "" };
@@ -2508,10 +2500,11 @@ function setAttendanceLocal(studentId, status) {
 }
 
 function bulkSet(status) {
-  if (!state.date) {
-    setToast("Pilih dahulu tanggal nya!");
+  if (state.holidayDates?.has(state.date)) {
+    setToast("Hari ini sedang libur!");
     return;
   }
+
   state.students.forEach(student => {
     state.attendance[String(student.id)] = { status, note: "" };
   });
@@ -2521,10 +2514,11 @@ function bulkSet(status) {
 }
 
 function clearAllAttendance() {
-  if (!state.date) {
-    setToast("Pilih dahulu tanggal nya!");
+  if (state.holidayDates?.has(state.date)) {
+    setToast("Hari ini sedang libur!");
     return;
   }
+
   state.attendance = {};
   state.dirtyAttendance = true;
 
@@ -2535,10 +2529,11 @@ function clearAllAttendance() {
 }
   
 async function saveAttendance() {
-  if (!state.date) {
-    setToast("Pilih dahulu tanggal nya!");
+ if (state.holidayDates?.has(state.date)) {
+    setToast("Hari ini sedang libur!");
     return;
   }
+
   try {
     const records = state.students
       .map(student => ({
@@ -3326,15 +3321,8 @@ async function changeClass(nextClassCode) {
 
 async function changeDate(nextDate) {
   if (nextDate === state.date) return;
-  if (String(nextDate) > todayIso()) return;
-  if (state.holidayDates?.has(nextDate)) {
-    setToast("Tanggal libur tidak bisa dipilih");
-    return;
-  }
   if (!(await confirmDiscardIfDirty())) return;
-  state.dayPicked = true;
   state.date = nextDate;
-  state.viewDate = nextDate;
   await loadClassData();
 }
 
