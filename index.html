@@ -3095,16 +3095,13 @@ function createReportWorkbook(report) {
       const style = (c === 1 || c === 2) ? styleLeft : styleBody;
       if (c >= 4 && c < 4 + days.length) {
         const day = days[c - 4];
-        const holidayText = day ? getHolidayText(day, report) : "";
-
-        if (day && holidayText) {
-          setCell(addr, holidayText, styleHoliday);
+      
+        if (day && (isWeekendDate(day.date) || day.isHoliday || holidaySet.has(day.date))) {
+          setCell(addr, "", styleHoliday);
         } else {
           const statusStyleApplied = statusStyle[rawStatus] || styleBody;
           setCell(addr, statusLabel(rawStatus), statusStyleApplied);
         }
-      } else {
-        setCell(addr, value, style);
       }
     });
   });
