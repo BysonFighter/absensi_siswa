@@ -381,38 +381,7 @@ async function getMonthlyReport(env, classCode, month, year) {
   };
 }
 
-  const studentRows = students.map((student) => {
-    const byDate = attendanceByStudent.get(String(student.id)) || {};
-    const totals = { H: 0, S: 0, I: 0, A: 0 };
-    for (const status of Object.values(byDate)) {
-      if (totals[status] !== undefined) totals[status] += 1;
-    }
-    return {
-      id: student.id,
-      nisn: student.nisn || "",
-      name: student.name || "",
-      gender: student.gender || "L",
-      studentOrder: student.studentOrder || 0,
-      attendance: byDate,
-      totals,
-    };
-  });
-
-  return {
-    class: {
-      code: classRow.code,
-      name: classRow.name,
-      waliKelas: classRow.waliKelas || (classCode === "4B" ? "Fahmi Arif" : ""),
-    },
-    academicYear: ACADEMIC_YEAR,
-    semester: SEMESTER_LABEL,
-    month,
-    year,
-    monthLabel: `${monthName(month)} ${year}`,
-    days,
-    students: studentRows,
-  };
-}
+ 
 
 export async function onRequest(context) {
   const { request, env } = context;
