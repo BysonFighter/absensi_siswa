@@ -2639,10 +2639,8 @@ function buildReportTable(report) {
   const rows = students.map((student, index) => {
     const totals = student.totals || { H: 0, S: 0, I: 0, A: 0 };
     const cells = days.map((day) => {
-      const holidayText = getHolidayText(day, report);
-    
-      if (holidayText) {
-        return `<td class="day-cell holiday-cell">${escapeHtml(holidayText)}</td>`;
+      if (day.isHoliday || holidaySet.has(day.date)) {
+        return `<td class="day-cell holiday-cell"></td>`;
       }
     
       const status = student.attendance?.[day.date] || "";
