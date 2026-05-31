@@ -1813,6 +1813,7 @@ const state = {
   dirtyRoster: false,
   holidayDates: new Set(),
   dayPicked: true,
+  viewDate: todayIso(),
 };
 
 const reportState = {
@@ -2327,7 +2328,7 @@ async function loadClassData() {
   try {
     const [students, attendance] = await Promise.all([
       apiGet({ action: "students", classCode: state.classCode }),
-      apiGet({ action: "attendance", classCode: state.classCode, date: state.date }),
+      apiGet({ action: "attendance", classCode: state.classCode, date: state.viewDate || todayIso() }),
     ]);
     state.students = students.students || [];
     state.students.sort((a, b) =>
@@ -2388,11 +2389,11 @@ function syncWeekNavButtons() {
 }
 
 function renderTop() {
-  const dateObj = parseLocalDate(state.date);
+  const dateObj = parseLocalDate(state.viewDate || todayIso());
 
-  el("#dateText").innerHTML = state.dayPicked
-    ? `<span>📅</span><span>${prettyDate(dateObj)}</span>`
-    : "";
+  el("#dateText").innerHTML = state.date
+  ? `<span>📅</span><span>${prettyDate(dateObj)}</span>`
+  : "";
 
   const monday = startWeek(dateObj);
 
@@ -2424,6 +2425,8 @@ function renderTop() {
     btn.addEventListener("click", async () => {
       if (btn.disabled) return;
       state.dayPicked = true;
+      state.date = btn.dataset.date;
+      state.viewDate = btn.dataset.date;
       await changeDate(btn.dataset.date);
     });
   });
@@ -2496,6 +2499,10 @@ function setAttendanceLocal(studentId, status) {
 }
 
 function bulkSet(status) {
+  if (!state.date) {
+    setToast("Pilih dahulu tanggal nya!");
+    return;
+  }
   state.students.forEach(student => {
     state.attendance[String(student.id)] = { status, note: "" };
   });
@@ -2505,6 +2512,10 @@ function bulkSet(status) {
 }
 
 function clearAllAttendance() {
+  if (!state.date) {
+    setToast("Pilih dahulu tanggal nya!");
+    return;
+  }
   state.attendance = {};
   state.dirtyAttendance = true;
 
@@ -2515,6 +2526,10 @@ function clearAllAttendance() {
 }
   
 async function saveAttendance() {
+  if (!state.date) {
+    setToast("Pilih dahulu tanggal nya!");
+    return;
+  }
   try {
     const records = state.students
       .map(student => ({
@@ -3540,18 +3555,22 @@ el("#rosterClassSelect").addEventListener("change", async () => {
 });
 
 el("#prevDay").addEventListener("click", async () => {
-  state.dayPicked = false;
-  const d = parseLocalDate(state.date);
+  const d = parseLocalDate(state.viewDate || todayIso());
   d.setDate(d.getDate() - 7);
-  await changeDate(todayIso(d));
+  state.viewDate = todayIso(d);
+  state.date = "";
+  state.dayPicked = false;
+  await loadClassData();
 });
 
 el("#nextDay").addEventListener("click", async () => {
   if (!canGoNextWeek()) return;
-  state.dayPicked = false;
-  const d = parseLocalDate(state.date);
+  const d = parseLocalDate(state.viewDate || todayIso());
   d.setDate(d.getDate() + 7);
-  await changeDate(todayIso(d));
+  state.viewDate = todayIso(d);
+  state.date = "";
+  state.dayPicked = false;
+  await loadClassData();
 });
 
 el("#q").addEventListener("input", renderList);
