@@ -1158,6 +1158,31 @@
 #holidayPage.active ~ .holiday-bottom{
   display:block;
 }
+
+#holidayPage .report-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr auto;
+  gap:8px;
+  align-items:end;
+}
+
+#holidayPage .holiday-top-card{
+  border:1px solid rgba(226,232,240,.95);
+  box-shadow:
+    0 6px 20px rgba(0,0,0,.04),
+    inset 0 1px 0 rgba(255,255,255,.45);
+}
+  
+#holidayPage .report-grid .field{
+  margin-bottom:0;
+}
+
+#holidayPage .holiday-show-btn{
+  height:48px;
+  min-height:48px;
+  padding:0 18px;
+  white-space:nowrap;
+}
   
 .header-card::after{
     content:"";
@@ -1360,7 +1385,7 @@
 
           <div class="field" style="align-self:end;">
             <label>&nbsp;</label>
-            <button class="btn secondary" id="showHolidayBtn" style="width:100%;min-height:56px;">
+            <button class="btn secondary holiday-show-btn" id="showHolidayBtn">
               <i class="fa-solid fa-magnifying-glass"></i>
               <span>Tampilkan</span>
             </button>
