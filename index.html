@@ -314,7 +314,26 @@
     cursor:pointer;
   }
   .day.active { background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,245,235,.95)); border-color:#ffb15c; color:#d97706; box-shadow:0 8px 20px rgba(255,122,0,.12); }
-  .day:disabled { opacity:.38; cursor:not-allowed; background:#f8fafc; color:#cbd5e1; }
+  .day:disabled {
+    cursor:not-allowed;
+  
+    background:rgba(255,241,242,.60);
+    color:#d97790;
+  
+    border:1px solid #fecdd3;
+  
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+  
+    opacity:.85;
+  
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.4);
+  }
+  
+  .day:disabled .n{
+    color:#d97790;
+  }
   .day .n { font-size:18px; font-weight:800; margin-top:4px; }
   .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
   .stat { border-radius:16px; padding:12px 10px; text-align:center; border:1px solid var(--line); opacity:0.55;}
