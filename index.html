@@ -2240,6 +2240,19 @@ function buildReportTable(report) {
   `;
 }
 
+function buildReportHtml(report) {
+  const className = report?.class?.name || "";
+  const classRoom = getReportRoomName(report?.class?.code || "");
+  const titleMonth = escapeHtml(report.monthLabel || "");
+  const schoolYear = escapeHtml(schoolYearLabel());
+  const semester = escapeHtml(semesterLabel());
+  const teacherName = escapeHtml(getReportTeacherName(report));
+  const titleClass = escapeHtml(className || "");
+  const studentsCount = report.students?.length || 0;
+  const reportTable = buildReportTable(report);
+
+  return `
+  
 <!doctype html>
 <html lang="id">
 <head>
@@ -2434,19 +2447,7 @@ function buildReportTable(report) {
 </html>`;
 }
 
-function buildReportHtml(report) {
-  const className = report?.class?.name || "";
-  const classRoom = getReportRoomName(report?.class?.code || "");
-  const titleMonth = escapeHtml(report.monthLabel || "");
-  const schoolYear = escapeHtml(schoolYearLabel());
-  const semester = escapeHtml(semesterLabel());
-  const teacherName = escapeHtml(getReportTeacherName(report));
-  const titleClass = escapeHtml(className || "");
-  const studentsCount = report.students?.length || 0;
-  const reportTable = buildReportTable(report);
 
-  return report;
-}
   
 async function printMonthlyReport() {
   try {
