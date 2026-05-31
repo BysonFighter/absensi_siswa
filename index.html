@@ -2389,35 +2389,36 @@ function syncWeekNavButtons() {
 
 function renderTop() {
   const dateObj = parseLocalDate(state.date);
+
   el("#dateText").innerHTML = state.dayPicked
-  ? `<span>📅</span><span>${prettyDate(dateObj)}</span>`
-  : "";
+    ? `<span>📅</span><span>${prettyDate(dateObj)}</span>`
+    : "";
 
   const monday = startWeek(dateObj);
 
   el("#week").innerHTML = Array.from({ length: 5 }, (_, i) => {
-  const d = new Date(monday);
-  d.setDate(d.getDate() + i);
-  const iso = todayIso(d);
+    const d = new Date(monday);
+    d.setDate(d.getDate() + i);
+    const iso = todayIso(d);
 
-  const active = state.dayPicked && iso === state.date ? "active" : "";
+    const active = state.dayPicked && iso === state.date ? "active" : "";
+    const isFuture = iso > todayIso();
+    const isHoliday = state.holidayDates?.has(iso);
 
-  const isFuture = iso > todayIso();
-  const isHoliday = state.holidayDates?.has(iso);
-  
-  const disabled = (isFuture || isHoliday) ? "disabled" : "";
-  const dayClass = isHoliday ? "holiday-day" : (isFuture ? "future-day" : "");
+    const disabled = (isFuture || isHoliday) ? "disabled" : "";
+    const dayClass = isHoliday ? "holiday-day" : (isFuture ? "future-day" : "");
 
-  return `
-    <button
-      class="day ${active} ${dayClass}"
-      data-date="${iso}"
-      ${disabled}
-    >
-      <div>${prettyShort(d).split(",")[0]}</div>
-      <div class="n">${d.getDate()}</div>
-    </button>
-  `;
+    return `
+      <button
+        class="day ${active} ${dayClass}"
+        data-date="${iso}"
+        ${disabled}
+      >
+        <div>${prettyShort(d).split(",")[0]}</div>
+        <div class="n">${d.getDate()}</div>
+      </button>
+    `;
+  }).join("");
 
   el("#week").querySelectorAll("[data-date]").forEach(btn => {
     btn.addEventListener("click", async () => {
