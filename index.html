@@ -47,7 +47,7 @@
   }
 
   .school-logo {
-    height: 60px;
+    height: 52px;
     width: auto;
     display: block;
     flex: 0 0 auto;
@@ -58,15 +58,18 @@
 
   @media (max-width:700px) and (orientation: portrait) {
     .school-logo{
-      height:48px;
+      height:36px;
     }
   
     h1{
-      font-size:22px;
+      font-size:32px;
+      line-height:1;
+      margin:0;
     }
   
     .sub{
-      font-size:12px;
+      font-size:14px;
+      margin-top:2px;
     }
   }
   .wrap{
@@ -912,6 +915,8 @@
     box-shadow:
       0 0 0 1px rgba(255,180,60,.25),
       0 8px 24px rgba(255,122,0,.08);
+    padding: 8px 16px !important;
+    border-radius: 22px;
   }
   
 }
@@ -977,6 +982,9 @@
   align-items: center;
   gap: 14px;
   overflow: visible;
+  padding: 0 !important;
+  gap: 12px;
+  min-height: 70px;
 }
 
 
