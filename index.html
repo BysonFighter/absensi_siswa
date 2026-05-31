@@ -1795,7 +1795,7 @@ const state = {
   dirtyAttendance: false,
   dirtyRoster: false,
   holidayDates: new Set(),
-  dayPicked: true,
+  
   viewDate: todayIso(),
 };
 
@@ -2417,7 +2417,7 @@ function renderList() {
 const isHolidaySelected = state.holidayDates?.has(state.date);
 
 el("#list").innerHTML = list.length ? list.map((student, idx) => {
-  const current = isHolidaySelected ? "" : (rec[String(student.id)]?.status || "");
+ 
     const current = isHolidaySelected ? "" : (rec[String(student.id)]?.status || "");
     return `
       <div class="student">
