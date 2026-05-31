@@ -2739,15 +2739,15 @@ el("#rosterClassSelect").addEventListener("change", async () => {
 
 el("#prevDay").addEventListener("click", async () => {
   const d = parseLocalDate(state.date);
-  const prevSchoolDay = moveToSchoolDay(d, -1);
-  await changeDate(todayIso(prevSchoolDay));
+  d.setDate(d.getDate() - 7);
+  await changeDate(todayIso(d));
 });
 
 el("#nextDay").addEventListener("click", async () => {
+  if (!canGoNextWeek()) return;
   const d = parseLocalDate(state.date);
-  const nextSchoolDay = moveToSchoolDay(d, 1);
-  if (todayIso(nextSchoolDay) > todayIso()) return;
-  await changeDate(todayIso(nextSchoolDay));
+  d.setDate(d.getDate() + 7);
+  await changeDate(todayIso(d));
 });
 
 el("#q").addEventListener("input", renderList);
