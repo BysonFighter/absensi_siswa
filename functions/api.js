@@ -79,11 +79,10 @@ async function ensureSchema(env) {
     CREATE TABLE IF NOT EXISTS holidays (
       id INTEGER PRIMARY KEY AUTOINCREMENT,
       class_code TEXT NOT NULL,
-      date TEXT NOT NULL,
+      date TEXT NOT NULL UNIQUE,
       note TEXT NOT NULL DEFAULT '',
       created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      UNIQUE(class_code, date)
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `).run();
   
@@ -299,13 +298,35 @@ async function saveHoliday(env, classCode, date, note = "") {
   await env.DB.prepare(
     `INSERT INTO holidays (class_code, date, note, updated_at)
      VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-     ON CONFLICT(class_code, date)
-     DO UPDATE SET
+     ON CONFLICT(date) DO UPDATE SET
+       class_code = excluded.class_code,
        note = excluded.note,
        updated_at = CURRENT_TIMESTAMP`
   ).bind(classCode, date, String(note || "").trim()).run();
 
   return true;
+}
+
+async function getHolidayList(env, month, year) {
+  const startDate = isoDate(year, month, 1);
+  const endDate = isoDate(year, month, daysInMonth(year, month));
+
+  const result = await env.DB.prepare(
+    `SELECT date, note, class_code AS classCode
+     FROM holidays
+     WHERE date BETWEEN ? AND ?
+     ORDER BY date`
+  ).bind(startDate, endDate).all();
+
+  return result.results || [];
+}
+
+async function deleteHoliday(env, date) {
+  const result = await env.DB.prepare(
+    "DELETE FROM holidays WHERE date = ?"
+  ).bind(date).run();
+
+  return result.meta?.changes || 0;
 }
 
 async function getMonthlyReport(env, classCode, month, year) {
@@ -411,6 +432,15 @@ export async function onRequest(context) {
         return json({ ok: true, classes: await getClasses(env) });
       }
 
+      if (action === "holidayList") {
+        const month = normalizeMonth(url.searchParams.get("month"));
+        const year = normalizeYear(url.searchParams.get("year"));
+        if (!month || !year) return badRequest("Bulan atau tahun tidak valid.");
+      
+        const holidays = await getHolidayList(env, month, year);
+        return json({ ok: true, holidays });
+      }
+      
       if (action === "students") {
         const classCode = normalizeClassCode(url.searchParams.get("classCode"));
         const includeInactive = String(url.searchParams.get("includeInactive") || "") === "1";
@@ -451,6 +481,14 @@ export async function onRequest(context) {
         if (!date) return badRequest("Tanggal wajib diisi.");
         const saved = await upsertAttendance(env, classCode, date, payload.records || [], Boolean(payload.replace));
         return json({ ok: true, saved });
+      }
+
+      if (actionPost === "deleteHoliday") {
+        const date = String(payload.date || "").trim();
+        if (!date) return badRequest("Tanggal wajib diisi.");
+      
+        await deleteHoliday(env, date);
+        return json({ ok: true });
       }
 
       if (actionPost === "saveRoster") {
