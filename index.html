@@ -903,13 +903,9 @@
 
 
 .header-card{
-    position: sticky;
-    top: 12px;
-    z-index: 1000;
+    position: relative;
     overflow: hidden;
-    background: rgba(255,255,255,.88);
-    backdrop-filter: blur(18px);
-    -webkit-backdrop-filter: blur(18px);
+    background: rgba(255,255,255,.75);
 
     border:2px solid rgba(255,122,0,.25);
 
@@ -917,10 +913,7 @@
       0 0 0 1px rgba(255,180,60,.25),
       0 8px 24px rgba(255,122,0,.08);
   }
-  @media (max-width:700px){
-  .header-card{
-    top: 8px;
-  }
+  
 }
 
 /* Aurora */
