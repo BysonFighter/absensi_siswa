@@ -921,6 +921,54 @@
   
 }
 
+.quick-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-top:12px;
+}
+
+.quick-action{
+  border:none;
+  border-radius:18px;
+  min-height:56px;
+  padding:14px 16px;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  font-weight:800;
+  letter-spacing:.2px;
+  color:#fff;
+  cursor:pointer;
+  box-shadow:0 10px 24px rgba(0,0,0,.08);
+}
+
+.quick-action i{
+  font-size:16px;
+  line-height:1;
+}
+
+.quick-action.logout{
+  background:linear-gradient(90deg, #16a34a 0%, #4ade80 100%);
+}
+
+.quick-action.reset{
+  background:linear-gradient(90deg, #dc2626 0%, #ef4444 100%);
+}
+
+@media (max-width:700px){
+  .quick-actions{
+    gap:8px;
+  }
+
+  .quick-action{
+    min-height:50px;
+    padding:12px 12px;
+    font-size:13px;
+  }
+}
+  
 /* Aurora */
 .header-card::before{
     content: "";
@@ -1072,6 +1120,19 @@
 
     <div class="week" id="week"></div>
     <div class="stats" id="stats"></div>
+
+    <div class="quick-actions">
+      <button class="quick-action logout" id="logoutBtn" type="button">
+        <i class="fa-solid fa-right-from-bracket"></i>
+        <span>LOGOUT</span>
+      </button>
+    
+      <button class="quick-action reset" id="clearAllAttendance" type="button">
+        <i class="fa-solid fa-rotate-left"></i>
+        <span>RESET DATA</span>
+      </button>
+    </div>
+    
   </div>
 
   <div class="card">
@@ -1124,7 +1185,7 @@
 
     <div class="sheetgrid" style="margin-top:12px">
         <button class="sheetbtn amber" id="changePinBtn">Ubah PIN</button>
-        <button class="sheetbtn cream" id="logoutBtn">Logout</button>
+        
     </div>
     
     <div style="height:14px"></div>
@@ -1137,9 +1198,7 @@
     <div class="sheetgrid" style="margin-top:12px">
       <button class="sheetbtn green" id="allH">Semua Hadir</button>
     
-      <button class="sheetbtn rose" id="clearAllAttendance">
-        Hapus Semua
-      </button>
+      
     
       <button class="sheetbtn full blue" id="saveBtn2">Kembali</button>
     </div>
