@@ -2498,42 +2498,35 @@ function clearAllAttendance() {
 }
   
 async function saveAttendance() {
+  if (state.holidayDates?.has(state.date)) {
+    setToast("Hari ini sedang libur!");
+    return;
+  }
+
   try {
     const records = state.students
       .map(student => ({
         studentId: student.id,
         status: state.attendance[String(student.id)]?.status || "",
       }))
-      .filter(row => ["H","S","I","A"].includes(row.status));
+      .filter(row => ["H", "S", "I", "A"].includes(row.status));
 
-    console.log("DATE =", state.date);
-    console.log("CLASS =", state.classCode);
-    console.log("RECORDS =", records);
-
-   const result = await apiPost("saveAttendance", {
+    const result = await apiPost("saveAttendance", {
       classCode: state.classCode,
       date: state.date,
       records,
       replace: true,
     });
-    
+
     if (!result.saved || result.saved <= 0) {
-      throw new Error("Hari ini libur.!");
+      throw new Error("Tidak ada data absensi yang tersimpan.");
     }
-    
-    state.dirtyAttendance = false;
-    renderTop();
-    setToast("Presensi tersimpan");
-
-    console.log("SAVE RESULT =", result);
 
     state.dirtyAttendance = false;
     renderTop();
     setToast("Presensi tersimpan");
-
   } catch (error) {
-    console.error(error);
-    alert(error.message || error);
+    showError(error);
   }
 }
 
