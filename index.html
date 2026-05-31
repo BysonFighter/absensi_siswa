@@ -1045,6 +1045,24 @@
 #loginBtn{
   border:2px solid #1d4ed8 !important;
 }
+
+.sheet-sep{
+  height:1px;
+  background:rgba(148,163,184,.22);
+  margin:14px 0;
+}
+
+.holiday-cell{
+  background:rgba(225,29,72,.12);
+  color:#be123c;
+  font-weight:900;
+}
+  
+.sheetbtn.holiday{
+  background:rgba(225,29,72,.08);
+  color:#be123c;
+  border:1px solid rgba(225,29,72,.25);
+}
   
 /* Aurora */
 .header-card::before{
@@ -1253,6 +1271,8 @@
   </div>
 </div>
 
+
+  
 <div class="overlay" id="overlay">
   <div class="sheet">
   <div class="sheetbar"></div>
@@ -1312,6 +1332,10 @@
     </div>
 
     <div class="sheetgrid" style="margin-top:12px">
+      <button class="sheetbtn holiday full" id="holidayBtn">
+        <i class="fa-solid fa-calendar-xmark"></i>
+        <span>Kelola Hari Libur</span>
+      </button>
       <button class="sheetbtn amber full" id="changePinBtn">
         <i class="fa-solid fa-key"></i>
         <span>Ubah PIN</span>
@@ -1367,8 +1391,40 @@
     </div>
   </div>
 </div>
+
+<div class="overlay" id="holidayOverlay" style="display:none;">
+  <div class="sheet pin-sheet">
+    <div class="sheetbar"></div>
+
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+      <div>
+        <div style="font-size:18px;font-weight:900">Kelola Hari Libur</div>
+        <div class="small">Pilih tanggal libur lalu simpan ke database.</div>
+      </div>
+      <button class="iconbtn" id="closeHolidaySheet">✕</button>
+    </div>
+
+    <div style="margin-top:14px;display:grid;gap:12px;">
+      <div class="field">
+        <label for="holidayDate">Tanggal Libur</label>
+        <input class="input" id="holidayDate" type="date">
+      </div>
+
+      <div class="field">
+        <label for="holidayNote">Keterangan</label>
+        <input class="input" id="holidayNote" type="text" placeholder="Contoh: Libur Nasional">
+      </div>
+
+      <div class="sheetgrid">
+        <button class="sheetbtn cream" id="cancelHolidayBtn">Batal</button>
+        <button class="sheetbtn rose" id="saveHolidayBtn">Simpan Libur</button>
+      </div>
+    </div>
+  </div>
+</div>
   
 <div class="overlay" id="rosterOverlay">
+  
   <div class="sheet">
     <div class="sheetbar"></div>
     <div class="split-head">
@@ -1477,7 +1533,7 @@ function showAppPage() {
   if (login) login.classList.remove("active");
   if (app) app.classList.add("active");
 
-  ["overlay", "pinOverlay", "rosterOverlay"].forEach(id => {
+  ["overlay", "pinOverlay", "holidayOverlay", "rosterOverlay"].forEach(id => {
     const node = el(`#${id}`);
     if (node) node.style.display = "none";
   });
@@ -1528,6 +1584,36 @@ function openChangePinSheet() {
   el("#confirmPin").value = "";
   setTimeout(() => el("#oldPin")?.focus(), 50);
 }
+
+function openHolidaySheet() {
+  el("#holidayOverlay").style.display = "flex";
+  el("#holidayDate").value = state.date;
+  el("#holidayNote").value = "";
+  setTimeout(() => el("#holidayDate")?.focus(), 50);
+}
+
+function closeHolidaySheet() {
+  el("#holidayOverlay").style.display = "none";
+}
+
+async function saveHoliday() {
+  const date = el("#holidayDate").value;
+  const note = el("#holidayNote").value.trim();
+
+  if (!date) {
+    setToast("Pilih tanggal libur");
+    return;
+  }
+
+  await apiPost("saveHoliday", {
+    classCode: state.classCode,
+    date,
+    note
+  });
+
+  setToast("Hari libur tersimpan");
+  closeHolidaySheet();
+}  
 
 function closePinSheet() {
   el("#pinOverlay").style.display = "none";
@@ -2081,7 +2167,7 @@ function countStatuses(attendanceMap, days) {
 function buildReportTable(report) {
   const days = report.days || [];
   const students = report.students || [];
-
+  const holidaySet = new Set((report.holidays || []).map(h => h.date));
   students.sort((a, b) =>
     (a.name || "").localeCompare(b.name || "", "id")
   );
@@ -2099,6 +2185,9 @@ function buildReportTable(report) {
   const rows = students.map((student, index) => {
     const totals = student.totals || { H: 0, S: 0, I: 0, A: 0 };
     const cells = days.map((day) => {
+      if (day.isHoliday || holidaySet.has(day.date)) {
+        return `<td class="day-cell holiday-cell">LIBUR</td>`;
+      }
       const status = student.attendance?.[day.date] || "";
       return `<td class="day-cell ${statusColorClass(status)}">${statusLabel(status)}</td>`;
     }).join("");
@@ -2411,7 +2500,7 @@ function createReportWorkbook(report) {
 
   const XLSX = window.XLSX;
   const wb = XLSX.utils.book_new();
-  const days = report.days || [];
+  const holidaySet = new Set((report.holidays || []).map(h => h.date));
   const students = report.students || [];
   const monthLabel = report.monthLabel || "";
   const classRoom = getReportRoomName(report?.class?.code || "");
@@ -2436,7 +2525,7 @@ function createReportWorkbook(report) {
       student.nisn || "",
       student.name || "",
       student.gender || "L",
-      ...days.map((day) => student.attendance?.[day.date] || ""),
+      ...days.map((day) => holidaySet.has(day.date) ? "" : (student.attendance?.[day.date] || "")),
       totals.H > 0 ? totals.H : "",
       totals.S > 0 ? totals.S : "",
       totals.I > 0 ? totals.I : "",
@@ -2454,6 +2543,22 @@ function createReportWorkbook(report) {
 
   const ws = XLSX.utils.aoa_to_sheet(data);
 
+  const studentStartRow = 7;
+    days.forEach((day, dayIdx) => {
+      if (!holidaySet.has(day.date) && !day.isHoliday) return;
+    
+      const col = 4 + dayIdx;
+      for (let r = studentStartRow; r < studentStartRow + students.length; r++) {
+        const addr = XLSX.utils.encode_cell({ r, c: col });
+        if (!ws[addr]) continue;
+        ws[addr].s = {
+          fill: { patternType: "solid", fgColor: { rgb: "FEE2E2" } },
+          font: { color: { rgb: "B91C1C" }, bold: true },
+          alignment: { horizontal: "center", vertical: "center" },
+        };
+      }
+    });
+  
   const colWidths = [
     4.5, 10.5, 20, 6,
     ...days.map(() => 4.0),
@@ -2926,7 +3031,10 @@ el("#pinOverlay").addEventListener("click", (e) => {
   if (e.target === el("#pinOverlay")) closePinSheet();
 });
 el("#savePinBtn").addEventListener("click", () => changePin().catch(showError));
-  
+el("#holidayBtn").addEventListener("click", openHolidaySheet);
+el("#closeHolidaySheet").addEventListener("click", closeHolidaySheet);
+el("#cancelHolidayBtn").addEventListener("click", closeHolidaySheet);
+el("#saveHolidayBtn").addEventListener("click", saveHoliday);  
 el("#rosterClassSelect").addEventListener("change", async () => {
   if (!(await confirmDiscardIfDirty())) {
     el("#rosterClassSelect").value = state.classCode;
