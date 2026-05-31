@@ -1235,9 +1235,10 @@
   position: relative;
   z-index: 1;
 
-  margin-bottom: 14px;
+  text-align: center;
+  margin: 0 0 16px 0;
 
-  font-size: 18px;
+  font-size: 20px;
   line-height: 1.1;
   font-weight: 900;
   letter-spacing: 0.3px;
@@ -1254,6 +1255,12 @@
   -webkit-text-fill-color: transparent;
 
   text-shadow: 0 2px 0 rgba(255,255,255,.42);
+}
+
+@media (max-width:700px){
+  #holidayPage .holiday-top-card .holiday-title{
+    font-size:17px;
+  }
 }
 
 #holidayPage .holiday-top-card .field{
