@@ -957,7 +957,7 @@
   margin-top:12px;
   display:grid;
   gap:10px;
-  max-height:420px;
+  max-height:calc(100vh - 420px);
   overflow-y:auto;
   padding-right:4px;
 }
@@ -1108,6 +1108,12 @@
   background:rgba(225,29,72,.08);
   color:#be123c;
   border:1px solid rgba(225,29,72,.25);
+}
+
+.holiday-top-card{
+  position: sticky;
+  top: 12px;
+  z-index: 30;
 }
   
 /* Aurora */
@@ -1322,30 +1328,22 @@
 
 <div id="holidayPage" class="page">
   <div class="wrap">
-    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;">
-      <div>
-        <h1 style="font-size:30px;">Kelola Hari Libur</h1>
-        <p class="sub">Tambah, lihat, dan hapus libur yang tersimpan.</p>
-      </div>
-      <button class="iconbtn" id="backHolidayBtn">
-        ✕
-      </button>
-    </div>
+    
 
     <div class="card">
-      <div class="report-card" style="margin-bottom:0;">
+      <div class="card holiday-top-card">
+        <div style="font-size:14px;font-weight:900;margin-bottom:12px;color:#9a3412;">
+          Simpan Hari Libur
+        </div>
+      
         <div class="field">
           <label for="holidayDate">Tanggal Libur</label>
           <input class="input" id="holidayDate" type="date">
         </div>
-
+      
         <div class="field" style="margin-top:12px;">
           <label for="holidayNote">Keterangan</label>
           <input class="input" id="holidayNote" type="text" placeholder="Contoh: Idul Adha">
-        </div>
-
-        <div style="margin-top:12px;">
-          
         </div>
       </div>
 
@@ -1366,12 +1364,14 @@
             <select class="select" id="holidayYearSelect"></select>
           </div>
 
-          <div class="report-actions" style="align-self:end;">
-              <button class="btn secondary" id="showHolidayBtn" style="width:100%;min-width:180px;">
+          <div class="field" style="align-self:end;">
+            <label>&nbsp;</label>
+            <button class="btn secondary" id="showHolidayBtn" style="width:100%;min-height:56px;">
               <i class="fa-solid fa-magnifying-glass"></i>
               <span>Tampilkan</span>
             </button>
           </div>
+          
         </div>
       </div>
 
