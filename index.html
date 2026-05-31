@@ -214,10 +214,15 @@
   
   
   .btn.primary{
-    background: linear-gradient(90deg, #ff7a00 0%, #ff9a1f 55%, #ffcc33 100%);
+    background:linear-gradient(
+      90deg,
+      #2563eb 0%,
+      #3b82f6 50%,
+      #60a5fa 100%
+    );
     color:#fff;
-    border-color: transparent;
-    box-shadow: 0 12px 24px rgba(255,122,0,.22);
+    border:1px solid #1d4ed8;
+    box-shadow:0 12px 24px rgba(37,99,235,.22);
   }
   .btn.success { background:#fff5e8; color:#c2410c; border-color:#ffd59a; }
   .btn.warn { background:#fff7ed; color:#c2410c; border-color:#ffd59a; }
@@ -1001,7 +1006,12 @@
 }
 
 .quick-action.logout{
-  background: linear-gradient(90deg, #ff7a00 0%, #ff9a1f 55%, #ffcc33 100%);
+  background:linear-gradient(
+    90deg,
+    #6f4e37 0%,
+    #8b5e3c 50%,
+    #a47148 100%
+  );
   color:#fff;
 }
 
@@ -1019,6 +1029,22 @@
     padding:12px 12px;
     font-size:13px;
   }
+}
+
+#openSheet2{
+  border:2px solid #cbd5e1;
+  background:#fff;
+  color:#334155;
+  box-shadow:
+    0 0 0 1px rgba(148,163,184,.15);
+}
+
+#saveBtn{
+  border:2px solid #1d4ed8 !important;
+}
+
+#loginBtn{
+  border:2px solid #1d4ed8 !important;
 }
   
 /* Aurora */
@@ -1798,8 +1824,16 @@ function currentAttendanceCounts() {
 
 function syncSaveButtons() {
   const label = state.dirtyAttendance ? "Simpan *" : "Simpan";
-  el("#saveBtn").textContent = label;
-  el("#saveBtn2").textContent = "Kembali";
+
+  el("#saveBtn").innerHTML = `
+    <i class="fa-solid fa-floppy-disk"></i>
+    <span>${label}</span>
+  `;
+
+  el("#saveBtn2").innerHTML = `
+    <i class="fa-solid fa-arrow-left"></i>
+    <span>Kembali</span>
+  `;
 }
 
 function canGoNextWeek() {
