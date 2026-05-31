@@ -323,20 +323,29 @@
   }
   
   .day.future-day:disabled{
-    background:rgba(255,241,242,.42);
-    color:#d97790;
-    opacity:.55;
-  }
-  
-  .day.holiday-day:disabled{
-    background:rgba(255,241,242,.72);
-    color:#be123c;
-    opacity:.88;
-    filter:saturate(1.08);
-    box-shadow:
-      0 0 12px rgba(225,29,72,.08),
-      inset 0 1px 0 rgba(255,255,255,.45);
-  }
+  background:rgba(255,241,242,.28);
+  color:#d97790;
+  opacity:.45;
+  backdrop-filter:blur(10px);
+  -webkit-backdrop-filter:blur(10px);
+  filter:saturate(.9);
+}
+
+.day.holiday-day:disabled{
+  background:rgba(255,241,242,.82);
+  color:#be123c;
+  opacity:.92;
+  backdrop-filter:blur(12px);
+  -webkit-backdrop-filter:blur(12px);
+  box-shadow:
+    0 0 12px rgba(225,29,72,.10),
+    inset 0 1px 0 rgba(255,255,255,.45);
+}
+
+.day.future-day:disabled .n,
+.day.holiday-day:disabled .n{
+  color:inherit;
+}
   
   .day.future-day:disabled .n{
     color:#d97790;
@@ -2391,7 +2400,7 @@ function syncWeekNavButtons() {
 function renderTop() {
   const dateObj = parseLocalDate(state.viewDate || todayIso());
 
-  el("#dateText").innerHTML = state.date
+  el("#dateText").innerHTML = state.dayPicked
   ? `<span>📅</span><span>${prettyDate(dateObj)}</span>`
   : "";
 
@@ -3323,7 +3332,9 @@ async function changeDate(nextDate) {
     return;
   }
   if (!(await confirmDiscardIfDirty())) return;
+  state.dayPicked = true;
   state.date = nextDate;
+  state.viewDate = nextDate;
   await loadClassData();
 }
 
@@ -3558,7 +3569,6 @@ el("#prevDay").addEventListener("click", async () => {
   const d = parseLocalDate(state.viewDate || todayIso());
   d.setDate(d.getDate() - 7);
   state.viewDate = todayIso(d);
-  state.date = "";
   state.dayPicked = false;
   await loadClassData();
 });
@@ -3568,7 +3578,6 @@ el("#nextDay").addEventListener("click", async () => {
   const d = parseLocalDate(state.viewDate || todayIso());
   d.setDate(d.getDate() + 7);
   state.viewDate = todayIso(d);
-  state.date = "";
   state.dayPicked = false;
   await loadClassData();
 });
