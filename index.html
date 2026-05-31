@@ -19,7 +19,7 @@
     --rose:#e11d48;
     --slate:#334155;
   }
-}
+
   * { box-sizing:border-box; }
   body {
     margin:0;
@@ -975,7 +975,7 @@
     border-radius: 22px;
   }
   
-}
+
 
 .quick-actions{
   display:grid;
@@ -1832,15 +1832,13 @@ function currentAttendanceCounts() {
 function syncSaveButtons() {
   const label = state.dirtyAttendance ? "Simpan *" : "Simpan";
 
-  el("#saveBtn").innerHTML = `
-    <i class="fa-solid fa-floppy-disk"></i>
-    <span>${label}</span>
-  `;
-
-  el("#saveBtn2").innerHTML = `
-    <i class="fa-solid fa-arrow-left"></i>
-    <span>Kembali</span>
-  `;
+  const saveBtn = el("#saveBtn");
+  if(saveBtn){
+    saveBtn.innerHTML = `
+      <i class="fa-solid fa-floppy-disk"></i>
+      <span>${label}</span>
+    `;
+  }
 }
 
 function canGoNextWeek() {
