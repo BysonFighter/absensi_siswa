@@ -314,17 +314,7 @@
     cursor:pointer;
   }
   .day.active { background:linear-gradient(180deg, rgba(255,255,255,.95), rgba(255,245,235,.95)); border-color:#ffb15c; color:#d97706; box-shadow:0 8px 20px rgba(255,122,0,.12); }
-  .day:disabled {
-    cursor:not-allowed;
-    border:1px solid #fecdd3;
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
-    box-shadow:inset 0 1px 0 rgba(255,255,255,.45);
-  }
-  
-  
-
-.day.holiday-day{
+  .day.holiday-day{
   background:rgba(255,241,242,.82);
   color:#be123c;
   opacity:.92;
@@ -338,17 +328,6 @@
 .day.holiday-day .n{
   color:#be123c;
 }
-
-.day.future-day:disabled .n,
-.day.holiday-day:disabled .n{
-  color:inherit;
-}
-  
-  
-  
-  .day.holiday-day:disabled .n{
-    color:#be123c;
-  }
   .day .n { font-size:18px; font-weight:800; margin-top:4px; }
   .stats { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; margin-top:12px; }
   .stat { border-radius:16px; padding:12px 10px; text-align:center; border:1px solid var(--line); opacity:0.55;}
@@ -2404,19 +2383,9 @@ function renderTop() {
     const d = new Date(monday);
     d.setDate(d.getDate() + i);
     const iso = todayIso(d);
-
     const active = iso === state.date ? "active" : "";
     const dayClass = state.holidayDates?.has(iso) ? "holiday-day" : "";
-
-    return `
-      <button
-        class="day ${active} ${dayClass}"
-        data-date="${iso}"
-      >
-        <div>${prettyShort(d).split(",")[0]}</div>
-        <div class="n">${d.getDate()}</div>
-      </button>
-    `;
+    return `<button class="day ${active} ${dayClass}" data-date="${iso}"><div>${prettyShort(d).split(",")[0]}</div><div class="n">${d.getDate()}</div></button>`;
   }).join("");
 
   el("#week").querySelectorAll("[data-date]").forEach(btn => {
@@ -2445,9 +2414,10 @@ function renderList() {
     return !q || label.includes(q);
   });
   const rec = state.attendance;
+const isHolidaySelected = state.holidayDates?.has(state.date);
 
-  el("#list").innerHTML = list.length ? list.map((student, idx) => {
-    const isHolidaySelected = state.holidayDates?.has(state.date);
+el("#list").innerHTML = list.length ? list.map((student, idx) => {
+  const current = isHolidaySelected ? "" : (rec[String(student.id)]?.status || "");
     const current = isHolidaySelected ? "" : (rec[String(student.id)]?.status || "");
     return `
       <div class="student">
@@ -2493,6 +2463,7 @@ function setAttendanceLocal(studentId, status) {
 
   const student = state.students.find(s => String(s.id) === String(studentId));
   if (!student) return;
+
   state.attendance[String(studentId)] = { status, note: "" };
   state.dirtyAttendance = true;
   renderTop();
@@ -2529,12 +2500,12 @@ function clearAllAttendance() {
 }
   
 async function saveAttendance() {
- if (state.holidayDates?.has(state.date)) {
+  if (state.holidayDates?.has(state.date)) {
     setToast("Hari ini sedang libur!");
     return;
   }
 
-  try {
+  try  {
     const records = state.students
       .map(student => ({
         studentId: student.id,
@@ -3554,19 +3525,16 @@ el("#rosterClassSelect").addEventListener("change", async () => {
 });
 
 el("#prevDay").addEventListener("click", async () => {
-  const d = parseLocalDate(state.viewDate || todayIso());
+  const d = parseLocalDate(state.date);
   d.setDate(d.getDate() - 7);
-  state.viewDate = todayIso(d);
-  state.dayPicked = false;
+  state.date = todayIso(d);
   await loadClassData();
 });
 
 el("#nextDay").addEventListener("click", async () => {
-  if (!canGoNextWeek()) return;
-  const d = parseLocalDate(state.viewDate || todayIso());
+  const d = parseLocalDate(state.date);
   d.setDate(d.getDate() + 7);
-  state.viewDate = todayIso(d);
-  state.dayPicked = false;
+  state.date = todayIso(d);
   await loadClassData();
 });
 
