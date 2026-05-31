@@ -929,8 +929,8 @@
   margin-top:12px;
   display:grid;
   gap:10px;
-  max-height:58vh;
-  overflow:auto;
+  max-height:420px;
+  overflow-y:auto;
   padding-right:4px;
 }
 
@@ -1298,12 +1298,26 @@
         </div>
 
         <div style="margin-top:12px;">
-          <button class="btn primary" id="saveHolidayBtn" style="width:100%;">
+          
+        </div>
+      </div>
+
+      <div class="bottom">
+        <div class="in">
+      
+          <button class="btn" id="backHolidayBtn" style="flex:1">
+            <i class="fa-solid fa-arrow-left"></i>
+            <span>Kembali</span>
+          </button>
+      
+          <button class="btn primary" id="saveHolidayBtn" style="flex:1">
             <i class="fa-solid fa-floppy-disk"></i>
             <span>Simpan Libur</span>
           </button>
+      
         </div>
       </div>
+      
     </div>
 
     <div class="card">
@@ -1319,8 +1333,8 @@
             <select class="select" id="holidayYearSelect"></select>
           </div>
 
-          <div class="report-actions">
-            <button class="btn secondary" id="showHolidayBtn">
+          <div class="report-actions" style="align-self:end;">
+              <button class="btn secondary" id="showHolidayBtn" style="width:100%;min-width:180px;">
               <i class="fa-solid fa-magnifying-glass"></i>
               <span>Tampilkan</span>
             </button>
@@ -1720,20 +1734,34 @@ function renderHolidayList() {
 
   box.innerHTML = items.map(item => `
     <div class="holiday-item">
-      <div class="head">
+  
+      <div style="
+        display:flex;
+        justify-content:space-between;
+        align-items:center;
+        gap:12px;
+      ">
         <div>
           <div class="nisn">${escapeHtml(formatHolidayDate(item.date))}</div>
           <div class="name">${escapeHtml(item.note || "-")}</div>
         </div>
-        <div class="badge">${escapeHtml(item.classCode || "")}</div>
+  
+        <div style="
+          display:flex;
+          align-items:center;
+          gap:8px;
+        ">
+          <div class="badge">
+            ${escapeHtml(item.classCode || "")}
+          </div>
+  
+          <button class="btn danger" data-del="${item.date}">
+            <i class="fa-solid fa-trash"></i>
+            <span>Hapus</span>
+          </button>
+        </div>
       </div>
-
-      <div class="inline-actions" style="justify-content:flex-end;margin-top:10px;">
-        <button class="btn danger" data-del="${item.date}">
-          <i class="fa-solid fa-trash"></i>
-          <span>Hapus</span>
-        </button>
-      </div>
+  
     </div>
   `).join("");
 
