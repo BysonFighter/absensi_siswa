@@ -2117,6 +2117,18 @@ function isWeekendDate(dateStr) {
   return day === 0 || day === 6; // Minggu atau Sabtu
 }
 
+function getHolidayText(day, report) {
+  const holiday = (report.holidays || []).find(h => h.date === day.date);
+  if (holiday) return (holiday.note || "Libur").trim();
+
+  if (isWeekendDate(day.date)) {
+    const dayName = new Intl.DateTimeFormat("id-ID", { weekday: "long" }).format(parseLocalDate(day.date));
+    return dayName;
+  }
+
+  return "";
+}
+  
 function startWeek(d) {
   const x = new Date(d);
   const day = (x.getDay() + 6) % 7;
@@ -2558,9 +2570,12 @@ function buildReportTable(report) {
   const rows = students.map((student, index) => {
     const totals = student.totals || { H: 0, S: 0, I: 0, A: 0 };
     const cells = days.map((day) => {
-      if (isWeekendDate(day.date) || day.isHoliday || holidaySet.has(day.date)) {
-        return `<td class="day-cell holiday-cell"></td>`;
+      const holidayText = getHolidayText(day, report);
+    
+      if (holidayText) {
+        return `<td class="day-cell holiday-cell">${escapeHtml(holidayText)}</td>`;
       }
+    
       const status = student.attendance?.[day.date] || "";
       return `<td class="day-cell ${statusColorClass(status)}">${statusLabel(status)}</td>`;
     }).join("");
@@ -2907,7 +2922,10 @@ function createReportWorkbook(report) {
       student.nisn || "",
       student.name || "",
       student.gender || "L",
-      ...days.map((day) => (isWeekendDate(day.date) || day.isHoliday || holidaySet.has(day.date)) ? "" : (student.attendance?.[day.date] || "")),
+      ...days.map((day) => {
+  const holidayText = getHolidayText(day, report);
+  return holidayText ? holidayText : (student.attendance?.[day.date] || "");
+}),
       totals.H > 0 ? totals.H : "",
       totals.S > 0 ? totals.S : "",
       totals.I > 0 ? totals.I : "",
@@ -2994,7 +3012,8 @@ function createReportWorkbook(report) {
     },
     alignment: {
       horizontal: "center",
-      vertical: "center"
+      vertical: "center",
+      wrapText: true
     },
     border: thinBorder
   };
@@ -3076,8 +3095,10 @@ function createReportWorkbook(report) {
       const style = (c === 1 || c === 2) ? styleLeft : styleBody;
       if (c >= 4 && c < 4 + days.length) {
         const day = days[c - 4];
-        if (day && (isWeekendDate(day.date) || day.isHoliday || holidaySet.has(day.date))) {
-          setCell(addr, "", styleHoliday);
+        const holidayText = day ? getHolidayText(day, report) : "";
+
+        if (day && holidayText) {
+          setCell(addr, holidayText, styleHoliday);
         } else {
           const statusStyleApplied = statusStyle[rawStatus] || styleBody;
           setCell(addr, statusLabel(rawStatus), statusStyleApplied);
