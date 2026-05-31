@@ -518,6 +518,34 @@
         0 -8px 32px rgba(0,0,0,.06),
         inset 0 1px 0 rgba(255,255,255,.25);
   }
+
+  .holiday-bottom{
+    position:fixed;
+    left:0;
+    right:0;
+    bottom:0;
+  
+    background:rgba(255,255,255,.70);
+    backdrop-filter:blur(18px);
+    -webkit-backdrop-filter:blur(18px);
+  
+    border-top:1px solid rgba(255,255,255,.25);
+  
+    box-shadow:
+        0 -8px 32px rgba(0,0,0,.06),
+        inset 0 1px 0 rgba(255,255,255,.25);
+  
+    z-index:20;
+  }
+  
+  .holiday-bottom .in{
+    width:min(96vw,1400px);
+    margin:0 auto;
+    padding:10px 20px;
+    display:flex;
+    gap:10px;
+  }
+  
   .bottom .in{
     width:min(96vw, 1400px);
     margin:0 auto;
@@ -1302,10 +1330,10 @@
         </div>
       </div>
 
-      <div class="bottom">
+      <div class="holiday-bottom">
         <div class="in">
       
-          <button class="btn" id="backHolidayBtn" style="flex:1">
+          <button class="btn" id="backHolidayBtn2" style="flex:1">
             <i class="fa-solid fa-arrow-left"></i>
             <span>Kembali</span>
           </button>
@@ -3219,6 +3247,7 @@ el("#pinOverlay").addEventListener("click", (e) => {
 el("#savePinBtn").addEventListener("click", () => changePin().catch(showError));
 el("#holidayBtn").addEventListener("click", openHolidayPage);
 el("#backHolidayBtn").addEventListener("click", closeHolidayPage);
+el("#backHolidayBtn2")?.addEventListener("click", closeHolidayPage);
 el("#showHolidayBtn").addEventListener("click", loadHolidayList);
 el("#saveHolidayBtn").addEventListener("click", saveHoliday);
 el("#rosterClassSelect").addEventListener("change", async () => {
