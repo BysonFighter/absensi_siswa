@@ -2186,7 +2186,7 @@ function buildReportTable(report) {
     const totals = student.totals || { H: 0, S: 0, I: 0, A: 0 };
     const cells = days.map((day) => {
       if (day.isHoliday || holidaySet.has(day.date)) {
-        return `<td class="day-cell holiday-cell">LIBUR</td>`;
+        return `<td class="day-cell holiday-cell"></td>`;
       }
       const status = student.attendance?.[day.date] || "";
       return `<td class="day-cell ${statusColorClass(status)}">${statusLabel(status)}</td>`;
@@ -2700,7 +2700,7 @@ function createReportWorkbook(report) {
       if (c >= 4 && c < 4 + days.length) {
         const day = days[c - 4];
         if (day && (day.isHoliday || holidaySet.has(day.date))) {
-          setCell(addr, "LIBUR", styleHoliday);
+          setCell(addr, "", styleHoliday);
         } else {
           const statusStyleApplied = statusStyle[rawStatus] || styleBody;
           setCell(addr, statusLabel(rawStatus), statusStyleApplied);
