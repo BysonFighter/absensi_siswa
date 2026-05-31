@@ -2632,10 +2632,9 @@ function buildReportTable(report) {
   const rows = students.map((student, index) => {
     const totals = student.totals || { H: 0, S: 0, I: 0, A: 0 };
     const cells = days.map((day) => {
-      if (day.isHoliday || holidaySet.has(day.date)) {
+      if (day.isHoliday || holidaySet.has(day.date) || isWeekendDate(day.date)) {
         return `<td class="day-cell holiday-cell"></td>`;
       }
-    
       const status = student.attendance?.[day.date] || "";
       return `<td class="day-cell ${statusColorClass(status)}">${statusLabel(status)}</td>`;
     }).join("");
