@@ -2311,7 +2311,7 @@ async function loadClassData() {
   try {
     const [students, attendance] = await Promise.all([
       apiGet({ action: "students", classCode: state.classCode }),
-      apiGet({ action: "attendance", classCode: state.classCode, date: state.viewDate || todayIso() }),
+      apiGet({ action: "attendance", classCode: state.classCode, date: state.date }),
     ]);
     state.students = students.students || [];
     state.students.sort((a, b) =>
@@ -2500,31 +2500,34 @@ function clearAllAttendance() {
 }
   
 async function saveAttendance() {
-  if (state.holidayDates?.has(state.date)) {
-    setToast("Hari ini sedang libur!");
-    return;
-  }
-
-  try  {
+  try {
     const records = state.students
       .map(student => ({
         studentId: student.id,
         status: state.attendance[String(student.id)]?.status || "",
       }))
-      .filter(row => ["H", "S", "I", "A"].includes(row.status));
+      .filter(row => ["H","S","I","A"].includes(row.status));
 
-    await apiPost("saveAttendance", {
+    console.log("DATE =", state.date);
+    console.log("CLASS =", state.classCode);
+    console.log("RECORDS =", records);
+
+    const result = await apiPost("saveAttendance", {
       classCode: state.classCode,
-      date: state.date || state.viewDate || todayIso(),
+      date: state.date,
       records,
       replace: true,
     });
 
+    console.log("SAVE RESULT =", result);
+
     state.dirtyAttendance = false;
     renderTop();
     setToast("Presensi tersimpan");
+
   } catch (error) {
-    showError(error);
+    console.error(error);
+    alert(error.message || error);
   }
 }
 
