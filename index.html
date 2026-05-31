@@ -1260,6 +1260,18 @@
   margin-bottom:0;
 }
 
+#holidayPage .holiday-show-wrap{
+  display:flex;
+  align-items:end;
+}
+
+#holidayPage .holiday-show-btn{
+  height:48px;
+  min-height:48px;
+  padding:0 18px;
+  white-space:nowrap;
+}
+  
 #holidayPage .holiday-show-btn{
   height:48px;
   min-height:48px;
@@ -1466,8 +1478,7 @@
             <select class="select" id="holidayYearSelect"></select>
           </div>
 
-          <div class="field" style="align-self:end;">
-            <label>&nbsp;</label>
+          <div class="holiday-show-wrap">
             <button class="btn secondary holiday-show-btn" id="showHolidayBtn">
               <i class="fa-solid fa-magnifying-glass"></i>
               <span>Tampilkan</span>
