@@ -1781,6 +1781,7 @@ const state = {
   rosterRows: [],
   dirtyAttendance: false,
   dirtyRoster: false,
+  holidayDates: new Set(),
 };
 
 const reportState = {
@@ -2128,6 +2129,19 @@ function getHolidayText(day, report) {
 
   return "";
 }
+
+async function loadHolidayDatesForCurrentMonth() {
+  const d = parseLocalDate(state.date);
+
+  const data = await apiGet({
+    action: "monthlyReport",
+    classCode: state.classCode,
+    month: d.getMonth() + 1,
+    year: d.getFullYear(),
+  });
+
+  state.holidayDates = new Set((data.report?.holidays || []).map(h => h.date));
+}
   
 function startWeek(d) {
   const x = new Date(d);
@@ -2297,6 +2311,12 @@ async function loadClassData() {
     state.attendance = {};
   }
   state.dirtyAttendance = false;
+
+  try {
+    await loadHolidayDatesForCurrentMonth();
+  } catch (error) {
+    state.holidayDates = new Set();
+  }
   
   render();
 }
@@ -2347,7 +2367,7 @@ function renderTop() {
     d.setDate(d.getDate() + i); // Senin - Jumat saja
     const iso = todayIso(d);
     const active = iso === state.date ? "active" : "";
-    const disabled = iso > todayIso() ? "disabled" : "";
+    const disabled = (iso > todayIso() || state.holidayDates?.has(iso)) ? "disabled" : "";
     return `<button class="day ${active}" data-date="${iso}" ${disabled}><div>${prettyShort(d).split(",")[0]}</div><div class="n">${d.getDate()}</div></button>`;
   }).join("");
 
@@ -3233,6 +3253,10 @@ async function changeClass(nextClassCode) {
 async function changeDate(nextDate) {
   if (nextDate === state.date) return;
   if (String(nextDate) > todayIso()) return;
+  if (state.holidayDates?.has(nextDate)) {
+    setToast("Tanggal libur tidak bisa dipilih");
+    return;
+  }
   if (!(await confirmDiscardIfDirty())) return;
   state.date = nextDate;
   await loadClassData();
