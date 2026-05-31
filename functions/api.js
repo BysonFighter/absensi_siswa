@@ -175,9 +175,9 @@ async function getHolidays(env, classCode, startDate, endDate) {
   const result = await env.DB.prepare(
     `SELECT date, note
      FROM holidays
-     WHERE class_code = ? AND date BETWEEN ? AND ?
+     WHERE date BETWEEN ? AND ?
      ORDER BY date`
-  ).bind(classCode, startDate, endDate).all();
+  ).bind(startDate, endDate).all();
 
   return result.results || [];
 }
