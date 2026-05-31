@@ -46,6 +46,22 @@
     flex-wrap: nowrap;
   }
 
+  .action-row,
+.sheetbtn,
+.btn{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+.action-row .quick-action i,
+.sheetbtn i,
+.btn i{
+  font-size:16px;
+  line-height:1;
+}
+  
   .school-logo {
     height: 48px;
     width: auto;
@@ -1168,8 +1184,15 @@
   <div class="in">
     
 
-    <button class="btn" id="openSheet2" style="flex:1">Options</button>
-    <button class="btn primary" id="saveBtn" style="flex:1">Simpan</button>
+    <button class="btn" id="openSheet2" style="flex:1">
+      <i class="fa-solid fa-gear"></i>
+      <span>Options</span>
+    </button>
+    
+    <button class="btn primary" id="saveBtn" style="flex:1">
+      <i class="fa-solid fa-floppy-disk"></i>
+      <span>Simpan</span>
+    </button>
   </div>
 </div>
 
@@ -1203,9 +1226,12 @@
     </div>
 
     <div class="sheetgrid" style="margin-top:12px">
-        <button class="sheetbtn amber" id="changePinBtn">Ubah PIN</button>
-        
+      <button class="sheetbtn amber full" id="changePinBtn">
+        <i class="fa-solid fa-key"></i>
+        <span>Ubah PIN</span>
+      </button>
     </div>
+
     
     <div style="height:14px"></div>
     
@@ -1214,13 +1240,19 @@
         <div class="small">Aksi cepat untuk Absensi hari ini.</div>
       </div>
     </div>
+    
     <div class="sheetgrid" style="margin-top:12px">
-      <button class="sheetbtn green" id="allH">Semua Hadir</button>
+      <button class="sheetbtn green" id="allH">
+        <i class="fa-solid fa-user-check"></i>
+        <span>Semua Hadir</span>
+      </button>
     
-      
-    
-      <button class="sheetbtn full blue" id="saveBtn2">Kembali</button>
+      <button class="sheetbtn full blue" id="saveBtn2">
+        <i class="fa-solid fa-arrow-left"></i>
+        <span>Kembali</span>
+      </button>
     </div>
+    
     <div class="small" style="margin-top:12px">
       Data Kehadiran disimpan ke database hanya saat klik tombol simpan.
     </div>
