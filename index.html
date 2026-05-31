@@ -2504,6 +2504,7 @@ function createReportWorkbook(report) {
 
   const XLSX = window.XLSX;
   const wb = XLSX.utils.book_new();
+  const days = report.days || [];
   const holidaySet = new Set((report.holidays || []).map(h => h.date));
   const students = report.students || [];
   const monthLabel = report.monthLabel || "";
