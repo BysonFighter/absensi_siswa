@@ -2510,12 +2510,20 @@ async function saveAttendance() {
     console.log("CLASS =", state.classCode);
     console.log("RECORDS =", records);
 
-    const result = await apiPost("saveAttendance", {
+   const result = await apiPost("saveAttendance", {
       classCode: state.classCode,
       date: state.date,
       records,
       replace: true,
     });
+    
+    if (!result.saved || result.saved <= 0) {
+      throw new Error("Hari ini libur.!");
+    }
+    
+    state.dirtyAttendance = false;
+    renderTop();
+    setToast("Presensi tersimpan");
 
     console.log("SAVE RESULT =", result);
 
