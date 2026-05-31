@@ -2681,8 +2681,13 @@ function createReportWorkbook(report) {
       const rawStatus = c >= 4 && c < 4 + days.length ? String(value || "").toUpperCase() : "";
       const style = (c === 1 || c === 2) ? styleLeft : styleBody;
       if (c >= 4 && c < 4 + days.length) {
-        const statusStyleApplied = statusStyle[rawStatus] || styleBody;
-        setCell(addr, statusLabel(rawStatus), statusStyleApplied);
+        const day = days[c - 4];
+        if (day && (day.isHoliday || holidaySet.has(day.date))) {
+          setCell(addr, "LIBUR", styleHoliday);
+        } else {
+          const statusStyleApplied = statusStyle[rawStatus] || styleBody;
+          setCell(addr, statusLabel(rawStatus), statusStyleApplied);
+        }
       } else {
         setCell(addr, value, style);
       }
