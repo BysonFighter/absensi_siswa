@@ -2358,17 +2358,15 @@ function syncSaveButtons() {
 }
 
 function canGoNextWeek() {
-  const currentStart = startWeek(parseLocalDate(state.date));
-  const currentEnd = new Date(currentStart);
-  currentEnd.setDate(currentEnd.getDate() + 6);
-  return currentEnd < parseLocalDate(todayIso());
+  return true;
 }
 
 function syncWeekNavButtons() {
   const prevBtn = el("#prevDay");
   const nextBtn = el("#nextDay");
+
   if (prevBtn) prevBtn.disabled = false;
-  if (nextBtn) nextBtn.disabled = !canGoNextWeek();
+  if (nextBtn) nextBtn.disabled = false;
 }
 
 function renderTop() {
@@ -3536,11 +3534,12 @@ el("#prevDay").addEventListener("click", async () => {
 });
 
 el("#nextDay").addEventListener("click", async () => {
-  if (!canGoNextWeek()) return;
   const d = parseLocalDate(state.date || todayIso());
   d.setDate(d.getDate() + 7);
+
   state.date = todayIso(d);
   state.viewDate = state.date;
+
   await loadClassData();
 });
 
