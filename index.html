@@ -2577,7 +2577,7 @@ function getReportTeacherName(report) {
 
 function reportMonthLabel(month, year) {
   const monthName = REPORT_MONTHS.find(item => Number(item.value) === Number(month))?.label || "";
-  return `Bulan` + `${monthName} ${year}`;
+  return `${monthName} ${year}`;
 }
 
 function schoolYearLabel() {
