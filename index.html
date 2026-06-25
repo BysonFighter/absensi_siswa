@@ -1405,7 +1405,7 @@
           <img src="logo-sekolah.png" class="school-logo" alt="Logo">
           <div>
             <h1>SD YPU</h1>
-            <p class="sub">Sistem Absensi Siswa</p>
+            <p class="sub">Sistem Presensi Siswa</p>
           </div>
         </div>
 
@@ -1451,7 +1451,7 @@
         <img src="logo-sekolah.png" class="school-logo" alt="Logo">
         <div>
           <h1>SD YPU</h1>
-          <p class="sub">Sistem Absensi Siswa</p>
+          <p class="sub">Sistem Presensi Siswa</p>
         </div>
       </div>
     </div>
@@ -1738,7 +1738,7 @@
       </div>
       <div class="class-delete-wrap" id="classDeleteWrap"></div>
       <div class="small" style="margin-top:8px">
-        Data siswa yang disimpan akan langsung digunakan pada menu absensi dan rekap.
+        Data siswa yang disimpan akan langsung digunakan pada menu Presensi dan rekap.
       </div>
     </div>
 
@@ -1768,8 +1768,8 @@
 <script>
 
 const holidayState = {
-  month: Number(localStorage.getItem("absensi-holiday-month") || (new Date().getMonth() + 1)),
-  year: Number(localStorage.getItem("absensi-holiday-year") || new Date().getFullYear()),
+  month: Number(localStorage.getItem("Presensi-holiday-month") || (new Date().getMonth() + 1)),
+  year: Number(localStorage.getItem("Presensi-holiday-year") || new Date().getFullYear()),
   items: []
 };
   
@@ -1804,7 +1804,7 @@ const HEADMASTER_NAME = "Isah Aisyah, A.Ma.Pd";
 const el = (s) => document.querySelector(s);
 const state = {
   classes: [],
-  classCode: localStorage.getItem("absensi-class-code") || DEFAULT_CLASS_CODE,
+  classCode: localStorage.getItem("Presensi-class-code") || DEFAULT_CLASS_CODE,
   date: todayIso(),
   students: [],
   attendance: {},
@@ -1818,8 +1818,8 @@ const state = {
 
 const reportState = {
   
-  month: Number(localStorage.getItem("absensi-report-month") || (new Date().getMonth() + 1)),
-  year: Number(localStorage.getItem("absensi-report-year") || new Date().getFullYear()),
+  month: Number(localStorage.getItem("Presensi-report-month") || (new Date().getMonth() + 1)),
+  year: Number(localStorage.getItem("Presensi-report-year") || new Date().getFullYear()),
 
 };
 
@@ -1949,8 +1949,8 @@ async function loadHolidayList() {
   holidayState.month = month;
   holidayState.year = year;
 
-  localStorage.setItem("absensi-holiday-month", String(month));
-  localStorage.setItem("absensi-holiday-year", String(year));
+  localStorage.setItem("Presensi-holiday-month", String(month));
+  localStorage.setItem("Presensi-holiday-year", String(year));
 
   const data = await apiGet({
     action: "holidayList",
@@ -2074,8 +2074,8 @@ function getLoginPinForClass(classCode) {
 function applyAuthClass(classCode) {
   state.classCode = classCode;
   reportState.classCode = classCode;
-  localStorage.setItem("absensi-class-code", state.classCode);
-  localStorage.setItem("absensi-report-class", reportState.classCode);
+  localStorage.setItem("Presensi-class-code", state.classCode);
+  localStorage.setItem("Presensi-report-class", reportState.classCode);
   syncClassSelectors();
   syncReportSelectors();
 
@@ -2102,8 +2102,8 @@ function logoutToLogin() {
   });
 
   state.classCode = DEFAULT_CLASS_CODE;
-  reportState.month = Number(localStorage.getItem("absensi-report-month") || (new Date().getMonth() + 1));
-  reportState.year = Number(localStorage.getItem("absensi-report-year") || new Date().getFullYear());
+  reportState.month = Number(localStorage.getItem("Presensi-report-month") || (new Date().getMonth() + 1));
+  reportState.year = Number(localStorage.getItem("Presensi-report-year") || new Date().getFullYear());
 
   syncLoginSelectors();
   showLoginPage();
@@ -2305,11 +2305,11 @@ async function loadClasses() {
 
   if (!state.classes.some(c => c.code === state.classCode)) {
     state.classCode = state.classes[0]?.code || DEFAULT_CLASS_CODE;
-    localStorage.setItem("absensi-class-code", state.classCode);
+    localStorage.setItem("Presensi-class-code", state.classCode);
   }
   if (!state.classes.some(c => c.code === reportState.classCode)) {
     reportState.classCode = state.classCode;
-    localStorage.setItem("absensi-report-class", reportState.classCode);
+    localStorage.setItem("Presensi-report-class", reportState.classCode);
   }
   syncClassSelectors();
   syncReportSelectors();
@@ -2536,7 +2536,7 @@ async function saveAttendance() {
     });
 
     if (!result.saved || result.saved <= 0) {
-      throw new Error("Tidak ada data absensi yang tersimpan.");
+      throw new Error("Tidak ada data Presensi yang tersimpan.");
     }
 
     state.dirtyAttendance = false;
@@ -3272,7 +3272,7 @@ async function exportMonthlyReportExcel() {
   try {
     const report = await loadMonthlyReportData();
     const wb = createReportWorkbook(report);
-    const filename = `laporan-absensi-${report.class.code}-${String(report.month).padStart(2, "0")}-${report.year}.xlsx`;
+    const filename = `laporan-Presensi-${report.class.code}-${String(report.month).padStart(2, "0")}-${report.year}.xlsx`;
     window.XLSX.writeFile(wb, filename, { compression: true });
   } catch (error) {
     showError(error);
@@ -3289,7 +3289,7 @@ function statusLetterForExcel(status) {
 
 async function confirmDiscardIfDirty() {
   if (!state.dirtyAttendance) return true;
-  return confirm("Ada perubahan absensi yang belum disimpan. Lanjutkan dan buang perubahan ini?");
+  return confirm("Ada perubahan Presensi yang belum disimpan. Lanjutkan dan buang perubahan ini?");
 }
 
 async function changeClass(nextClassCode) {
@@ -3299,7 +3299,7 @@ async function changeClass(nextClassCode) {
     return;
   }
   state.classCode = nextClassCode;
-  localStorage.setItem("absensi-class-code", state.classCode);
+  localStorage.setItem("Presensi-class-code", state.classCode);
   el("#classSelect").value = state.classCode;
   el("#rosterClassSelect").value = state.classCode;
   syncClassSelectors();
@@ -3470,7 +3470,7 @@ async function moveRoster() {
 
 async function deleteClassRoster() {
   if (!isSixthClass(state.classCode)) return;
-  const ok = confirm(`Hapus semua siswa dan absensi untuk ${classLabel(state.classCode)}? Tindakan ini tidak bisa dibatalkan.`);
+  const ok = confirm(`Hapus semua siswa dan Presensi untuk ${classLabel(state.classCode)}? Tindakan ini tidak bisa dibatalkan.`);
   if (!ok) return;
   try {
     await apiPost("deleteClassRoster", { classCode: state.classCode });
@@ -3533,7 +3533,7 @@ el("#rosterClassSelect").addEventListener("change", async () => {
     return;
   }
   state.classCode = el("#rosterClassSelect").value;
-  localStorage.setItem("absensi-class-code", state.classCode);
+  localStorage.setItem("Presensi-class-code", state.classCode);
   el("#classSelect").value = state.classCode;
   syncClassSelectors();
   await loadClassData();
@@ -3586,12 +3586,12 @@ el("#saveBtn").addEventListener("click", saveAttendance);
 
 el("#reportMonthSelect").addEventListener("change", () => {
   reportState.month = Number(el("#reportMonthSelect").value);
-  localStorage.setItem("absensi-report-month", String(reportState.month));
+  localStorage.setItem("Presensi-report-month", String(reportState.month));
 });
 
 el("#reportYearSelect").addEventListener("change", () => {
   reportState.year = Number(el("#reportYearSelect").value);
-  localStorage.setItem("absensi-report-year", String(reportState.year));
+  localStorage.setItem("Presensi-report-year", String(reportState.year));
 });
 
 el("#printReportBtn").addEventListener("click", () => printMonthlyReport().catch(showError));
