@@ -1851,11 +1851,27 @@ const state = {
 
 const reportState = {
   
+  
   month: Number(localStorage.getItem("Presensi-report-month") || (new Date().getMonth() + 1)),
   year: Number(localStorage.getItem("Presensi-report-year") || new Date().getFullYear()),
 
 };
 
+function buildGraphYearOptions() {
+  const select = el("#graphYearSelect");
+  if (!select) return;
+
+  const currentYear = new Date().getFullYear();
+
+  let html = "";
+
+  for (let y = currentYear - 2; y <= currentYear + 2; y++) {
+    html += `<option value="${y}" ${y === currentYear ? "selected" : ""}>${y}</option>`;
+  }
+
+  select.innerHTML = html;
+}
+  
 const AUTH_SESSION_KEY = "sdypu-auth-class";
 const AUTH_PERSIST_KEY = "sdypu-auth-persist";
 const AUTH_LAST_CLASS_KEY = "sdypu-auth-last-class";
@@ -3629,7 +3645,19 @@ el("#reportYearSelect").addEventListener("change", () => {
 
 el("#printReportBtn").addEventListener("click", () => printMonthlyReport().catch(showError));
 el("#exportExcelBtn").addEventListener("click", () => exportMonthlyReportExcel().catch(showError));
+el("#showGraphBtn").addEventListener("click", async () => {
+  const semester = el("#graphSemesterSelect").value;
+  const year = el("#graphYearSelect").value;
 
+  if (!semester) {
+    setToast("Pilih semester terlebih dahulu");
+    return;
+  }
+
+  el("#graphContainer").style.display = "block";
+
+  // isi grafik nanti
+});
 
 el("#closeRoster").addEventListener("click", closeRoster);
 el("#rosterOverlay").addEventListener("click", (e) => { if (e.target === el("#rosterOverlay")) closeRoster(); });
@@ -3691,8 +3719,10 @@ el("#logoutBtn").addEventListener("click", () => {
   logoutToLogin();
 });
 
+buildGraphYearOptions();
 init();
 </script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 </body>
 </html>
