@@ -1643,39 +1643,42 @@
       
     </div>
 
-    <div class="sheetgrid" style="margin-top:12px">
-      
-      <div class="card report-card" style="margin-bottom:12px">
-        <div style="font-size:15px;font-weight:900;margin-bottom:12px">
-          Grafik Presensi Semester
-        </div>
-        <div class="report-grid">
-          <div class="field">
-            <label>Semester</label>
-            <select class="select" id="graphSemesterSelect">
-              <option value="">Pilih Semester</option>
-              <option value="1">Semester 1</option>
-              <option value="2">Semester 2</option>
-            </select>
-          </div>
-      
-          <div class="field">
-            <label>Tahun</label>
-            <select class="select" id="graphYearSelect"></select>
-          </div>
-      
-          <div class="report-actions">
-            <button class="btn primary" id="showGraphBtn">
-              <i class="fa-solid fa-chart-column"></i>
-              <span>Lihat Grafik</span>
-            </button>
-          </div>
-        </div>
-      
-        <div style="margin-top:16px;display:none" id="graphContainer">
-          <canvas id="attendanceChart"></canvas>
-        </div>
+    <div class="card report-card" style="margin-bottom:12px">
+
+      <div style="font-size:15px;font-weight:900;margin-bottom:12px">
+        Grafik Presensi Semester
       </div>
+    
+      <div class="report-grid">
+    
+        <div class="field">
+          <label>Semester</label>
+          <select class="select" id="graphSemesterSelect">
+            <option value="">Pilih Semester</option>
+            <option value="1">Semester 1</option>
+            <option value="2">Semester 2</option>
+          </select>
+        </div>
+    
+        <div class="field">
+          <label>Tahun</label>
+          <select class="select" id="graphYearSelect"></select>
+        </div>
+    
+        <div class="report-actions">
+          <button class="btn primary" id="showGraphBtn">
+            <i class="fa-solid fa-chart-column"></i>
+            <span>Lihat Grafik</span>
+          </button>
+        </div>
+    
+      </div>
+    
+      <div id="graphContainer" style="display:none;margin-top:20px">
+        <canvas id="attendanceChart"></canvas>
+      </div>
+    
+    </div>
       
       <button class="sheetbtn holiday full" id="holidayBtn">
         <i class="fa-solid fa-calendar-xmark"></i>
