@@ -3136,7 +3136,7 @@ function createReportWorkbook(report) {
   setCell("B7", "NISN", styleHeader);
   setCell("C5", row5[2], styleHeader);
   setCell("D5", row5[3], styleHeader);
-  setCell("E5", monthLabel, styleHeader);
+  setCell("E5", `Bulan ${monthLabel}`, styleHeader);
   setCell(XLSX.utils.encode_cell({ r: 4, c: 4 + days.length }), "Hadir", styleHeader);
   setCell(XLSX.utils.encode_cell({ r: 4, c: 5 + days.length }), "Sakit", styleHeader);
   setCell(XLSX.utils.encode_cell({ r: 4, c: 6 + days.length }), "Ijin", styleHeader);
