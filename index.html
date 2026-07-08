@@ -1826,7 +1826,7 @@
     <div class="split-head roster-title-row">
       <div>
         <div style="font-size:18px;font-weight:900">Kelola Data Siswa</div>
-        <div class="small">Hanya untuk kelas yang sedang login: <b id="rosterClassLabel">-</b>.</div>
+        <div class="small"><b id="rosterClassLabel">-</b>.</div>
       </div>
       <button class="iconbtn" id="closeRoster">✕</button>
     </div>
@@ -3598,7 +3598,7 @@ function renderRoster() {
   const classLabelEl = el("#rosterClassLabel");
   if (classLabelEl) classLabelEl.textContent = className;
 
-  el("#rosterHint").innerHTML = `Jumlah siswa: <b>${list.length}</b> • Aktif: <b>${activeCount}</b> • Nonaktif: <b>${inactiveCount}</b>. Siswa nonaktif otomatis hilang dari absensi dan laporan.`;
+  el("#rosterHint").innerHTML = `Jumlah siswa: <b>${list.length}</b> • Aktif: <b>${activeCount}</b> • Nonaktif: <b>${inactiveCount}</b>.`;
   el("#rosterList").innerHTML = list.length
     ? list.map((row, idx) => rosterRowTemplate(row, idx)).join("")
     : `<div class="empty">Belum ada siswa di ${className}. Klik <b>+ Tambah</b> untuk menambahkan siswa baru.</div>`;
