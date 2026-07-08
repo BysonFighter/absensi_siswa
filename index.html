@@ -813,11 +813,32 @@
     gap:10px;
     flex-wrap:wrap;
   }
+  .roster-title-row {
+    align-items:flex-start;
+    flex-wrap:nowrap;
+  }
+  .roster-title-row > div:first-child {
+    flex:1 1 auto;
+    min-width:0;
+  }
+  .roster-title-row .iconbtn {
+    flex:0 0 auto;
+    min-width:56px;
+    min-height:56px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:20px;
+  }
   .roster-actions {
     display:flex;
     gap:8px;
     flex-wrap:wrap;
     justify-content:flex-end;
+  }
+  .roster-add-row {
+    justify-content:flex-start;
+    margin-top:12px;
   }
   .class-delete-wrap {
     margin-top:10px;
@@ -1802,15 +1823,16 @@
 <div class="overlay" id="rosterOverlay">
   <div class="sheet roster-sheet">
     <div class="sheetbar"></div>
-    <div class="split-head">
+    <div class="split-head roster-title-row">
       <div>
         <div style="font-size:18px;font-weight:900">Kelola Data Siswa</div>
         <div class="small">Hanya untuk kelas yang sedang login: <b id="rosterClassLabel">-</b>.</div>
       </div>
-      <div class="roster-actions">
-        <button class="btn secondary" id="showAddStudentFormBtn">+ Tambah</button>
-        <button class="iconbtn" id="closeRoster">✕</button>
-      </div>
+      <button class="iconbtn" id="closeRoster">✕</button>
+    </div>
+
+    <div class="roster-actions roster-add-row">
+      <button class="btn secondary" id="showAddStudentFormBtn">+ Tambah</button>
     </div>
 
     <div class="subtle-panel add-student-panel" id="addStudentPanel" style="display:none;">
@@ -1965,10 +1987,12 @@ function formatHolidayDate(iso) {
 }
 
 function openHolidayPage() {
+  closeSheet(true);
   el("#appPage").classList.remove("active");
   el("#holidayPage").classList.add("active");
   document.body.classList.remove("app-ready");
   document.title = "SD YPU - Kelola Hari Libur";
+  setBackPanelState("holiday", "replace");
 
   buildMonthOptions(el("#holidayMonthSelect"), holidayState.month);
   buildYearOptions(el("#holidayYearSelect"), holidayState.year);
@@ -1976,7 +2000,11 @@ function openHolidayPage() {
   loadHolidayList();
 }
 
-function closeHolidayPage() {
+function closeHolidayPage(fromBack = false) {
+  if (!fromBack && isAppPanelState()) {
+    history.back();
+    return;
+  }
   el("#holidayPage").classList.remove("active");
   showAppPage();
 }
@@ -2000,6 +2028,71 @@ function clearAuth() {
   localStorage.removeItem(AUTH_PERSIST_KEY);
 }
 
+
+const APP_PANEL_STATE_KEY = "sdypuPanel";
+
+function isPanelOpen(selector) {
+  const node = el(selector);
+  return Boolean(node && node.style.display && node.style.display !== "none");
+}
+
+function isAppPanelState() {
+  return Boolean(history.state && history.state[APP_PANEL_STATE_KEY]);
+}
+
+function setBackPanelState(panel, mode = "push") {
+  const current = history.state || {};
+  if (current[APP_PANEL_STATE_KEY] === panel) return;
+  const nextState = { ...current, [APP_PANEL_STATE_KEY]: panel };
+  if (mode === "replace" && isAppPanelState()) {
+    history.replaceState(nextState, "");
+  } else {
+    history.pushState(nextState, "");
+  }
+}
+
+function closeVisiblePanelFromBack() {
+  const addPanel = el("#addStudentPanel");
+  if (addPanel && addPanel.style.display !== "none") {
+    hideAddStudentForm(true);
+    return true;
+  }
+
+  if (isPanelOpen("#pinOverlay")) {
+    closePinSheet(true);
+    return true;
+  }
+
+  if (isPanelOpen("#rosterOverlay")) {
+    closeRoster(true);
+    return true;
+  }
+
+  if (isPanelOpen("#overlay")) {
+    closeSheet(true);
+    return true;
+  }
+
+  if (el("#holidayPage")?.classList.contains("active")) {
+    closeHolidayPage(true);
+    return true;
+  }
+
+  return false;
+}
+
+function closePanelByButton(closeFn) {
+  if (isAppPanelState()) {
+    history.back();
+  } else {
+    closeFn(true);
+  }
+}
+
+window.addEventListener("popstate", () => {
+  closeVisiblePanelFromBack();
+});
+
 function syncLoginSelectors() {
   const sel = el("#loginClassSelect");
   if (!sel) return;
@@ -2010,6 +2103,7 @@ function syncLoginSelectors() {
 
 function openChangePinSheet() {
   el("#pinOverlay").style.display = "flex";
+  setBackPanelState("pin");
   el("#oldPin").value = "";
   el("#newPin").value = "";
   el("#confirmPin").value = "";
@@ -2111,7 +2205,11 @@ function renderHolidayList() {
   });
 }
   
-function closePinSheet() {
+function closePinSheet(fromBack = false) {
+  if (!fromBack && isAppPanelState()) {
+    history.back();
+    return;
+  }
   el("#pinOverlay").style.display = "none";
 }
 
@@ -3420,18 +3518,32 @@ async function changeDate(nextDate) {
   await loadClassData();
 }
 
-function openSheet() { el("#overlay").style.display = "flex"; }
-function closeSheet() { el("#overlay").style.display = "none"; }
+function openSheet() {
+  el("#overlay").style.display = "flex";
+  setBackPanelState("sheet");
+}
+function closeSheet(fromBack = false) {
+  if (!fromBack && isAppPanelState()) {
+    history.back();
+    return;
+  }
+  el("#overlay").style.display = "none";
+}
 
 
-function closeRoster() {
+function closeRoster(fromBack = false) {
+  if (!fromBack && isAppPanelState()) {
+    history.back();
+    return;
+  }
   el("#rosterOverlay").style.display = "none";
-  hideAddStudentForm();
+  hideAddStudentForm(true);
 }
 
 function openRoster() {
-  closeSheet();
+  closeSheet(true);
   el("#rosterOverlay").style.display = "flex";
+  setBackPanelState("roster", "replace");
   loadRosterEditor().catch(showError);
 }
 
@@ -3539,13 +3651,18 @@ async function saveRoster(options = {}) {
 
 function showAddStudentForm() {
   el("#addStudentPanel").style.display = "block";
+  setBackPanelState("addStudent");
   el("#newStudentNisn").value = "";
   el("#newStudentName").value = "";
   el("#newStudentGender").value = "";
   setTimeout(() => el("#newStudentName")?.focus(), 50);
 }
 
-function hideAddStudentForm() {
+function hideAddStudentForm(fromBack = false) {
+  if (!fromBack && isAppPanelState() && history.state?.[APP_PANEL_STATE_KEY] === "addStudent") {
+    history.back();
+    return;
+  }
   const panel = el("#addStudentPanel");
   if (panel) panel.style.display = "none";
 }
@@ -3659,7 +3776,7 @@ el("#q").addEventListener("input", renderList);
 const openSheetBtn = el("#openSheet2");
 if (openSheetBtn) openSheetBtn.addEventListener("click", openSheet);
 
-const closeSheetBtn = el("#closeSheet");
+const closeSheetBtn = el("#closeSheetBtn") || el("#closeSheet");
 if (closeSheetBtn) closeSheetBtn.addEventListener("click", closeSheet);
 
 const overlayEl = el("#overlay");
