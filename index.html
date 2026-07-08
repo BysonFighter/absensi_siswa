@@ -42,6 +42,21 @@
   body.preload-ready {
     visibility: visible;
   }
+
+  html.popup-open,
+  body.popup-open {
+    overflow: hidden !important;
+    overscroll-behavior: none;
+  }
+
+  body.popup-open {
+    position: fixed;
+    left: 0;
+    right: 0;
+    width: 100%;
+    touch-action: none;
+  }
+
   
   .brand {
     display: flex;
@@ -601,6 +616,9 @@
     align-items:flex-end;
     justify-content:center;
     z-index:50;
+    overflow:hidden;
+    overscroll-behavior:contain;
+    touch-action:none;
   }
   .sheet {
     width:min(1100px, 100%);
@@ -610,6 +628,9 @@
     border-radius:26px 26px 0 0;
     padding:14px;
     box-shadow:0 -20px 40px rgba(0,0,0,.18);
+    overscroll-behavior:contain;
+    -webkit-overflow-scrolling:touch;
+    touch-action:pan-y;
   }
   .sheetbar { width:56px; height:5px; border-radius:999px; background:#cbd5e1; margin:0 auto 12px; }
   .sheetgrid { display:grid; grid-template-columns:repeat(2,1fr); gap:10px; }
@@ -821,14 +842,26 @@
     flex:1 1 auto;
     min-width:0;
   }
-  .roster-title-row .iconbtn {
+  .roster-head-actions {
     flex:0 0 auto;
-    min-width:56px;
-    min-height:56px;
     display:flex;
     align-items:center;
-    justify-content:center;
-    font-size:20px;
+    justify-content:flex-end;
+    gap:8px;
+  }
+  .roster-head-actions .btn,
+  .roster-head-actions .iconbtn {
+    min-height:44px;
+    height:44px;
+    border-radius:16px;
+    padding:0 14px;
+  }
+  .roster-head-actions .iconbtn {
+    width:44px;
+    min-width:44px;
+    padding:0;
+    font-size:18px;
+    line-height:1;
   }
   .roster-actions {
     display:flex;
@@ -839,6 +872,11 @@
   .roster-add-row {
     justify-content:flex-start;
     margin-top:12px;
+  }
+  @media (max-width:520px){
+    .roster-title-row{ gap:8px; }
+    .roster-head-actions .btn{ padding:0 12px; font-size:13px; }
+    .roster-head-actions .iconbtn{ width:42px; min-width:42px; height:42px; min-height:42px; }
   }
   .class-delete-wrap {
     margin-top:10px;
@@ -1828,11 +1866,10 @@
         <div style="font-size:18px;font-weight:900">Kelola Data Siswa</div>
         <div class="small"><b id="rosterClassLabel">-</b>.</div>
       </div>
-      <button class="iconbtn" id="closeRoster">✕</button>
-    </div>
-
-    <div class="roster-actions roster-add-row">
-      <button class="btn secondary" id="showAddStudentFormBtn">+ Tambah</button>
+      <div class="roster-head-actions">
+        <button class="btn secondary" id="showAddStudentFormBtn">+ Tambah</button>
+        <button class="iconbtn" id="closeRoster">✕</button>
+      </div>
     </div>
 
     <div class="subtle-panel add-student-panel" id="addStudentPanel" style="display:none;">
@@ -1961,10 +1998,7 @@ function showAppPage() {
   if (login) login.classList.remove("active");
   if (app) app.classList.add("active");
 
-  ["overlay", "pinOverlay", "holidayOverlay", "rosterOverlay"].forEach(id => {
-    const node = el(`#${id}`);
-    if (node) node.style.display = "none";
-  });
+  hideAllPopups();
 
   document.body.classList.add("app-ready");
   document.title = `SD YPU - ${classLabel(state.classCode)}`;
@@ -2036,6 +2070,42 @@ function isPanelOpen(selector) {
   return Boolean(node && node.style.display && node.style.display !== "none");
 }
 
+let popupScrollY = 0;
+function hasVisiblePopup() {
+  return ["#overlay", "#pinOverlay", "#rosterOverlay", "#holidayOverlay"]
+    .some(selector => isPanelOpen(selector));
+}
+function setPopupScrollLock(locked) {
+  const body = document.body;
+  const html = document.documentElement;
+  if (locked && !body.classList.contains("popup-open")) {
+    popupScrollY = window.scrollY || html.scrollTop || 0;
+    body.dataset.popupScrollY = String(popupScrollY);
+    body.style.top = `-${popupScrollY}px`;
+    body.classList.add("popup-open");
+    html.classList.add("popup-open");
+    return;
+  }
+  if (!locked && body.classList.contains("popup-open")) {
+    const restoreY = Number(body.dataset.popupScrollY || popupScrollY || 0);
+    body.classList.remove("popup-open");
+    html.classList.remove("popup-open");
+    body.style.top = "";
+    delete body.dataset.popupScrollY;
+    window.scrollTo(0, restoreY);
+  }
+}
+function refreshPopupScrollLock() {
+  setPopupScrollLock(hasVisiblePopup());
+}
+function hideAllPopups() {
+  ["overlay", "pinOverlay", "holidayOverlay", "rosterOverlay"].forEach(id => {
+    const node = el(`#${id}`);
+    if (node) node.style.display = "none";
+  });
+  refreshPopupScrollLock();
+}
+
 function isAppPanelState() {
   return Boolean(history.state && history.state[APP_PANEL_STATE_KEY]);
 }
@@ -2103,6 +2173,7 @@ function syncLoginSelectors() {
 
 function openChangePinSheet() {
   el("#pinOverlay").style.display = "flex";
+  refreshPopupScrollLock();
   setBackPanelState("pin");
   el("#oldPin").value = "";
   el("#newPin").value = "";
@@ -2211,6 +2282,7 @@ function closePinSheet(fromBack = false) {
     return;
   }
   el("#pinOverlay").style.display = "none";
+  refreshPopupScrollLock();
 }
 
 async function changePin() {
@@ -2291,10 +2363,7 @@ function loginWithClass(classCode, remember) {
 function logoutToLogin() {
   clearAuth();
 
-  ["overlay", "pinOverlay", "rosterOverlay"].forEach(id => {
-    const node = el(`#${id}`);
-    if (node) node.style.display = "none";
-  });
+  hideAllPopups();
 
   state.classCode = DEFAULT_CLASS_CODE;
   reportState.month = Number(localStorage.getItem("Presensi-report-month") || (new Date().getMonth() + 1));
@@ -3520,6 +3589,7 @@ async function changeDate(nextDate) {
 
 function openSheet() {
   el("#overlay").style.display = "flex";
+  refreshPopupScrollLock();
   setBackPanelState("sheet");
 }
 function closeSheet(fromBack = false) {
@@ -3528,6 +3598,7 @@ function closeSheet(fromBack = false) {
     return;
   }
   el("#overlay").style.display = "none";
+  refreshPopupScrollLock();
 }
 
 
@@ -3538,11 +3609,13 @@ function closeRoster(fromBack = false) {
   }
   el("#rosterOverlay").style.display = "none";
   hideAddStudentForm(true);
+  refreshPopupScrollLock();
 }
 
 function openRoster() {
   closeSheet(true);
   el("#rosterOverlay").style.display = "flex";
+  refreshPopupScrollLock();
   setBackPanelState("roster", "replace");
   loadRosterEditor().catch(showError);
 }
@@ -3778,6 +3851,12 @@ if (openSheetBtn) openSheetBtn.addEventListener("click", openSheet);
 
 const closeSheetBtn = el("#closeSheetBtn") || el("#closeSheet");
 if (closeSheetBtn) closeSheetBtn.addEventListener("click", closeSheet);
+
+document.querySelectorAll(".overlay .sheet").forEach(sheet => {
+  ["click", "mousedown", "mouseup", "touchstart", "touchmove", "touchend"].forEach(eventName => {
+    sheet.addEventListener(eventName, event => event.stopPropagation(), { passive: true });
+  });
+});
 
 const overlayEl = el("#overlay");
 if (overlayEl) {
