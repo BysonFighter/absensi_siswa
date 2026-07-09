@@ -19,12 +19,6 @@ function isValidClassCode(code) {
   return /^(?:[1-6])[AB]$/.test(code);
 }
 
-function gradeLevelFromClassCode(code) {
-  const normalized = normalizeClassCode(code);
-  const level = Number.parseInt(normalized.charAt(0), 10);
-  return Number.isFinite(level) ? level : 0;
-}
-
 function normalizeMonth(value) {
   const month = Number.parseInt(String(value || ""), 10);
   if (!Number.isFinite(month) || month < 1 || month > 12) return null;
@@ -71,42 +65,6 @@ async function getColumnNames(env, tableName) {
 }
 
 async function ensureSchema(env) {
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS classes (
-      code TEXT PRIMARY KEY,
-      name TEXT NOT NULL,
-      sort_order INTEGER NOT NULL,
-      wali_kelas TEXT NOT NULL DEFAULT '',
-      pin TEXT NOT NULL DEFAULT '123456'
-    )
-  `).run();
-
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS students (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      class_code TEXT NOT NULL,
-      student_order INTEGER NOT NULL DEFAULT 1,
-      nisn TEXT NOT NULL DEFAULT '',
-      name TEXT NOT NULL,
-      gender TEXT NOT NULL DEFAULT 'L',
-      active INTEGER NOT NULL DEFAULT 1,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS attendance (
-      date TEXT NOT NULL,
-      class_code TEXT NOT NULL,
-      student_id INTEGER NOT NULL,
-      status TEXT NOT NULL CHECK(status IN ('H', 'S', 'I', 'A')),
-      note TEXT NOT NULL DEFAULT '',
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      PRIMARY KEY (date, class_code, student_id)
-    )
-  `).run();
-
   const studentCols = await getColumnNames(env, "students");
   if (!studentCols.has("gender")) {
     await env.DB.prepare(`ALTER TABLE students ADD COLUMN gender TEXT NOT NULL DEFAULT 'L'`).run();
@@ -115,9 +73,6 @@ async function ensureSchema(env) {
   const classCols = await getColumnNames(env, "classes");
   if (!classCols.has("wali_kelas")) {
     await env.DB.prepare(`ALTER TABLE classes ADD COLUMN wali_kelas TEXT NOT NULL DEFAULT ''`).run();
-  }
-  if (!classCols.has("pin")) {
-    await env.DB.prepare(`ALTER TABLE classes ADD COLUMN pin TEXT NOT NULL DEFAULT '123456'`).run();
   }
 
   await env.DB.prepare(`
@@ -130,68 +85,11 @@ async function ensureSchema(env) {
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
   `).run();
-
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS subjects (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      class_scope TEXT NOT NULL DEFAULT 'ALL',
-      name TEXT NOT NULL,
-      sort_order INTEGER NOT NULL DEFAULT 1
-    )
-  `).run();
-
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS assessment_sessions (
-      id INTEGER PRIMARY KEY AUTOINCREMENT,
-      class_code TEXT NOT NULL,
-      date TEXT NOT NULL,
-      subject_name TEXT NOT NULL,
-      assessment_type TEXT NOT NULL,
-      title TEXT NOT NULL,
-      kkm INTEGER NOT NULL DEFAULT 75,
-      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
-    )
-  `).run();
-
-  await env.DB.prepare(`
-    CREATE TABLE IF NOT EXISTS assessment_scores (
-      session_id INTEGER NOT NULL,
-      student_id INTEGER NOT NULL,
-      score REAL,
-      note TEXT NOT NULL DEFAULT '',
-      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-      PRIMARY KEY (session_id, student_id),
-      FOREIGN KEY (session_id) REFERENCES assessment_sessions(id) ON DELETE CASCADE,
-      FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
-    )
-  `).run();
-
-  await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_assessment_sessions_class_date ON assessment_sessions(class_code, date)`).run();
-  await env.DB.prepare(`CREATE INDEX IF NOT EXISTS idx_assessment_scores_session ON assessment_scores(session_id)`).run();
-
-  const subjectSeed = [
-    ['ALL', 'PAI', 1],
-    ['ALL', 'PPKn', 2],
-    ['ALL', 'Bahasa Indonesia', 3],
-    ['ALL', 'Matematika', 4],
-    ['ALL', 'IPAS', 5],
-    ['ALL', 'PJOK', 6],
-    ['ALL', 'SBdP', 7],
-    ['ALL', 'Bahasa Sunda', 8],
-    ['ALL', 'Bahasa Inggris', 9],
-  ];
-  const subjectCount = await env.DB.prepare(`SELECT COUNT(*) AS total FROM subjects`).first();
-  if ((subjectCount?.total || 0) === 0) {
-    await env.DB.batch(subjectSeed.map(([scope, name, order]) => env.DB.prepare(
-      `INSERT INTO subjects (class_scope, name, sort_order) VALUES (?, ?, ?)`
-    ).bind(scope, name, order)));
-  }
-
+  
   await env.DB.prepare(`
     UPDATE classes
-    SET wali_kelas = 'Fahmi Arif', pin = COALESCE(NULLIF(pin, ''), '123456')
-    WHERE code = '4B' AND (wali_kelas IS NULL OR wali_kelas = '' OR pin IS NULL OR pin = '')
+    SET wali_kelas = 'Fahmi Arif'
+    WHERE code = '4B' AND (wali_kelas IS NULL OR wali_kelas = '')
   `).run();
 }
 
@@ -281,164 +179,6 @@ async function getHolidays(env, classCode, startDate, endDate) {
   ).bind(startDate, endDate).all();
 
   return result.results || [];
-}
-
-async function getSubjects(env, classCode) {
-  const level = gradeLevelFromClassCode(classCode);
-  const scope = level >= 4 ? 'UPPER' : 'LOWER';
-  const result = await env.DB.prepare(
-    `SELECT id, name, class_scope AS classScope, sort_order AS sortOrder
-     FROM subjects
-     WHERE class_scope IN ('ALL', ?)
-     ORDER BY sort_order, name`
-  ).bind(scope).all();
-  return result.results || [];
-}
-
-async function getAssessmentSessions(env, classCode, month, year, subjectName = '', assessmentType = '') {
-  const conditions = ['class_code = ?'];
-  const binds = [classCode];
-
-  if (month) {
-    conditions.push(`CAST(strftime('%m', date) AS INTEGER) = ?`);
-    binds.push(month);
-  }
-  if (year) {
-    conditions.push(`CAST(strftime('%Y', date) AS INTEGER) = ?`);
-    binds.push(year);
-  }
-  if (subjectName) {
-    conditions.push(`subject_name = ?`);
-    binds.push(subjectName);
-  }
-  if (assessmentType) {
-    conditions.push(`assessment_type = ?`);
-    binds.push(assessmentType);
-  }
-
-  const sql = `
-    SELECT id, class_code AS classCode, date, subject_name AS subjectName,
-           assessment_type AS assessmentType, title, kkm,
-           created_at AS createdAt, updated_at AS updatedAt
-    FROM assessment_sessions
-    WHERE ${conditions.join(' AND ')}
-    ORDER BY date DESC, id DESC
-  `;
-
-  const sessionsResult = await env.DB.prepare(sql).bind(...binds).all();
-  const sessions = sessionsResult.results || [];
-  const students = await getStudents(env, classCode, false);
-  const totalStudents = students.length;
-
-  for (const session of sessions) {
-    const scoreResult = await env.DB.prepare(
-      `SELECT score FROM assessment_scores WHERE session_id = ?`
-    ).bind(session.id).all();
-    const scoreRows = scoreResult.results || [];
-    const filled = scoreRows.filter(row => row.score !== null && row.score !== '' && Number.isFinite(Number(row.score)));
-    const avg = filled.length ? filled.reduce((sum, row) => sum + Number(row.score || 0), 0) / filled.length : 0;
-    const completeCount = filled.length;
-    const passedCount = filled.filter(row => Number(row.score || 0) >= Number(session.kkm || 75)).length;
-    session.average = Number(avg.toFixed(1));
-    session.completeCount = completeCount;
-    session.totalStudents = totalStudents;
-    session.passCount = passedCount;
-  }
-
-  return sessions;
-}
-
-async function getAssessmentSessionDetail(env, sessionId) {
-  const session = await env.DB.prepare(
-    `SELECT id, class_code AS classCode, date, subject_name AS subjectName,
-            assessment_type AS assessmentType, title, kkm,
-            created_at AS createdAt, updated_at AS updatedAt
-     FROM assessment_sessions
-     WHERE id = ?`
-  ).bind(sessionId).first();
-
-  if (!session) return null;
-
-  const scoreResult = await env.DB.prepare(
-    `SELECT sc.student_id AS studentId, sc.score, sc.note,
-            st.nisn, st.name, st.gender, st.student_order AS studentOrder, st.active
-     FROM assessment_scores sc
-     JOIN students st ON st.id = sc.student_id
-     WHERE sc.session_id = ?
-     ORDER BY st.student_order, st.id`
-  ).bind(sessionId).all();
-
-  const students = await getStudents(env, session.classCode, false);
-  const scoreMap = new Map((scoreResult.results || []).map(row => [String(row.studentId), row]));
-  const rows = students.map(student => {
-    const found = scoreMap.get(String(student.id)) || {};
-    return {
-      studentId: student.id,
-      nisn: student.nisn || '',
-      name: student.name || '',
-      gender: student.gender || 'L',
-      studentOrder: student.studentOrder || 0,
-      score: found.score ?? null,
-      note: found.note || '',
-    };
-  });
-
-  return {
-    session,
-    scores: rows,
-  };
-}
-
-async function saveAssessmentSession(env, payload = {}) {
-  const classCode = normalizeClassCode(payload.classCode);
-  const date = String(payload.date || '').trim();
-  const subjectName = String(payload.subjectName || '').trim();
-  const assessmentType = String(payload.assessmentType || '').trim();
-  const title = String(payload.title || '').trim();
-  const kkm = Number.parseInt(String(payload.kkm || '75'), 10) || 75;
-  const sessionId = payload.sessionId ? Number(payload.sessionId) : null;
-
-  if (!isValidClassCode(classCode)) throw new Error('Kode kelas tidak valid.');
-  if (!date) throw new Error('Tanggal penilaian wajib diisi.');
-  if (!subjectName) throw new Error('Mapel wajib diisi.');
-  if (!assessmentType) throw new Error('Jenis penilaian wajib diisi.');
-  if (!title) throw new Error('TP / Materi wajib diisi.');
-
-  let activeSessionId = sessionId;
-
-  if (activeSessionId) {
-    await env.DB.prepare(
-      `UPDATE assessment_sessions
-       SET class_code = ?, date = ?, subject_name = ?, assessment_type = ?,
-           title = ?, kkm = ?, updated_at = CURRENT_TIMESTAMP
-       WHERE id = ?`
-    ).bind(classCode, date, subjectName, assessmentType, title, kkm, activeSessionId).run();
-    await env.DB.prepare(`DELETE FROM assessment_scores WHERE session_id = ?`).bind(activeSessionId).run();
-  } else {
-    const created = await env.DB.prepare(
-      `INSERT INTO assessment_sessions (class_code, date, subject_name, assessment_type, title, kkm)
-       VALUES (?, ?, ?, ?, ?, ?)`
-    ).bind(classCode, date, subjectName, assessmentType, title, kkm).run();
-    activeSessionId = Number(created.meta?.last_row_id || 0);
-  }
-
-  const records = Array.isArray(payload.scores) ? payload.scores : [];
-  const statements = [];
-  for (const row of records) {
-    const studentId = Number(row?.studentId || 0);
-    const rawScore = row?.score;
-    const note = String(row?.note || '').trim();
-    if (!studentId) continue;
-    const hasScore = rawScore !== '' && rawScore !== null && rawScore !== undefined;
-    const score = hasScore ? Number(rawScore) : null;
-    statements.push(env.DB.prepare(
-      `INSERT INTO assessment_scores (session_id, student_id, score, note, updated_at)
-       VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)`
-    ).bind(activeSessionId, studentId, Number.isFinite(score) ? score : null, note));
-  }
-  if (statements.length) await env.DB.batch(statements);
-
-  return activeSessionId;
 }
 
 async function clearAttendance(env, classCode, date) {
@@ -727,31 +467,6 @@ export async function onRequest(context) {
         return json({ ok: true, report });
       }
 
-      if (action === "subjects") {
-        const classCode = normalizeClassCode(url.searchParams.get("classCode"));
-        if (!isValidClassCode(classCode)) return badRequest("Kode kelas tidak valid.");
-        return json({ ok: true, subjects: await getSubjects(env, classCode) });
-      }
-
-      if (action === "assessmentSessions") {
-        const classCode = normalizeClassCode(url.searchParams.get("classCode"));
-        const month = normalizeMonth(url.searchParams.get("month"));
-        const year = normalizeYear(url.searchParams.get("year"));
-        const subjectName = String(url.searchParams.get("subjectName") || "").trim();
-        const assessmentType = String(url.searchParams.get("assessmentType") || "").trim();
-        if (!isValidClassCode(classCode)) return badRequest("Kode kelas tidak valid.");
-        const sessions = await getAssessmentSessions(env, classCode, month, year, subjectName, assessmentType);
-        return json({ ok: true, sessions });
-      }
-
-      if (action === "assessmentSessionDetail") {
-        const sessionId = Number(url.searchParams.get("sessionId") || 0);
-        if (!sessionId) return badRequest("Session penilaian tidak valid.");
-        const detail = await getAssessmentSessionDetail(env, sessionId);
-        if (!detail) return notFound("Data penilaian tidak ditemukan.");
-        return json({ ok: true, detail });
-      }
-
       return notFound();
     }
 
@@ -860,11 +575,6 @@ export async function onRequest(context) {
         if (!isValidClassCode(classCode)) return badRequest("Kode kelas tidak valid.");
         await deleteClassRoster(env, classCode);
         return json({ ok: true });
-      }
-
-      if (actionPost === "saveAssessmentSession") {
-        const sessionId = await saveAssessmentSession(env, payload);
-        return json({ ok: true, sessionId });
       }
 
       return notFound();
